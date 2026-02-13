@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url';
 import { initDatabase } from './db/database.js';
 import alertRoutes from './api/routes/alerts.js';
 import subscriberRoutes from './api/routes/subscribers.js';
+import refreshData from './api/refresh-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,9 +31,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/alerts', alertRoutes);
 app.use('/api/subscribers', subscriberRoutes);
 
+// API endpoint to trigger a manual refresh
+app.get('/api/refresh', async (req, res) => {
+  try {
+    await refreshData();
+    res.json({ message: 'Data refreshed', timestamp: new Date().toISOString() });
+  } catch (error) {
+    res.status(500).json({ error: 'Refresh failed: ' + error.message });
+  }
+});
+
 // Initialize database and start server
 initDatabase();
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Water Dashboard server running on port ${PORT}`);
+
+  // Run initial data refresh on startup
+  console.log('Running initial data refresh...');
+  refreshData()
+    .then(() => console.log('Initial data refresh complete'))
+    .catch(err => console.error('Initial data refresh failed:', err.message));
+
+  // Refresh data every hour
+  const ONE_HOUR = 60 * 60 * 1000;
+  setInterval(() => {
+    console.log('Running scheduled data refresh...');
+    refreshData()
+      .then(() => console.log('Scheduled refresh complete'))
+      .catch(err => console.error('Scheduled refresh failed:', err.message));
+  }, ONE_HOUR);
 });
