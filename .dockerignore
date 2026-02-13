@@ -1,0 +1,34 @@
+# Environment variables & credentials
+.env
+google-credentials.json
+
+# Dependencies
+node_modules/
+
+# Generated data files
+public/data/*.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Database
+*.db
+*.db-journal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archives
+*.tar.gz
+*.zip
+
+# Claude Code
+.claude/
