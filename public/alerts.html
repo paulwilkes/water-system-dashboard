@@ -415,41 +415,6 @@
   }
 
   /* ── Recipient Selector ── */
-  .recipient-options {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .recipient-option {
-    flex: 1;
-    padding: 14px 16px;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-    background: none;
-    font-family: inherit;
-  }
-
-  .recipient-option:hover { border-color: var(--blue); }
-  .recipient-option.selected {
-    border-color: var(--coral);
-    background: var(--coral-light);
-  }
-
-  .recipient-option-label {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 2px;
-  }
-
-  .recipient-option-desc {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-
   /* ── Buttons ── */
   .btn {
     padding: 12px 24px;
@@ -740,7 +705,6 @@
     .stat-row { grid-template-columns: repeat(2, 1fr); }
     .alert-type-grid { grid-template-columns: 1fr; }
     .inline-form { grid-template-columns: 1fr 1fr; }
-    .recipient-options { flex-direction: column; }
   }
 
   @media (max-width: 600px) {
@@ -851,16 +815,6 @@
       </div>
       <div class="card-body">
         <div class="form-group">
-          <label class="form-label">Affected Area</label>
-          <select class="form-select" id="zone-select" onchange="updateCostEstimate()">
-            <option value="all">All Zones — System Wide</option>
-            <option value="Zone 1">Zone 1 — Main Loop</option>
-            <option value="Zone 2">Zone 2 — Hilltop</option>
-            <option value="Zone 3">Zone 3 — Lakeside</option>
-          </select>
-        </div>
-
-        <div class="form-group">
           <label class="form-label">Message</label>
           <textarea class="form-textarea" id="alert-message" oninput="updatePreview(); updateCharCount(); updateCostEstimate();"
             placeholder="Describe the situation, affected area, expected duration, and any instructions for residents..."></textarea>
@@ -881,20 +835,7 @@
         <!-- Recipients -->
         <div class="form-group">
           <label class="form-label">Recipients</label>
-          <div class="recipient-options">
-            <button class="recipient-option selected" onclick="selectRecipient(this, 'all')">
-              <div class="recipient-option-label">All Subscribers</div>
-              <div class="recipient-option-desc" id="recipient-all-desc">-- active numbers</div>
-            </button>
-            <button class="recipient-option" onclick="selectRecipient(this, 'zone')">
-              <div class="recipient-option-label">By Zone</div>
-              <div class="recipient-option-desc">Filter by area</div>
-            </button>
-            <button class="recipient-option" onclick="selectRecipient(this, 'test')">
-              <div class="recipient-option-label">Test Only</div>
-              <div class="recipient-option-desc">Send to admin phone</div>
-            </button>
-          </div>
+          <div class="recipient-info" id="recipient-all-desc" style="font-size: 14px; color: var(--text-muted); padding: 8px 0;">All active subscribers</div>
         </div>
 
         <div class="btn-group">
@@ -927,14 +868,13 @@
               <tr>
                 <th>Name</th>
                 <th>Phone</th>
-                <th>Zone</th>
                 <th>Status</th>
                 <th>Opted In</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="subscriber-table-body">
-              <tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 32px;">Loading subscribers...</td></tr>
+              <tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 32px;">Loading subscribers...</td></tr>
             </tbody>
           </table>
         </div>
@@ -948,14 +888,6 @@
           <div class="form-group">
             <label class="form-label">Phone</label>
             <input class="form-input" type="tel" id="add-phone" placeholder="(555) 000-0000">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Zone</label>
-            <select class="form-select" id="add-zone">
-              <option>Zone 1</option>
-              <option>Zone 2</option>
-              <option>Zone 3</option>
-            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Status</label>
@@ -1004,7 +936,7 @@
 <script>
   // ─── State ───────────────────────────────────────────────
   let selectedAlertType = null;
-  let selectedRecipientMode = 'all';
+  // Recipients are always all active subscribers (no zone filtering)
   let statsData = null;
   let searchTimeout = null;
 
@@ -1051,7 +983,7 @@
       document.getElementById('stat-delivery').textContent = statsData.deliveryRate + '%';
       document.getElementById('stat-alerts').textContent = statsData.alertsThisYear;
       document.getElementById('stat-cost').textContent = '$' + statsData.monthlyCost.toFixed(2);
-      document.getElementById('recipient-all-desc').textContent = `${statsData.active} active numbers`;
+      document.getElementById('recipient-all-desc').textContent = `All ${statsData.active} active subscribers`;
     } catch (err) {
       console.error('Failed to load stats:', err);
     }
@@ -1059,9 +991,9 @@
 
   // ─── Alert Type Selection ────────────────────────────────
   const templates = {
-    repair: '🔧 WATER MAIN REPAIR — Beulah Park Water System will be performing repairs in [ZONE]. Water service may be interrupted from [TIME] to [TIME]. Please plan accordingly. Reply STOP to unsubscribe.',
-    outage: '🚫 SERVICE OUTAGE — Beulah Park Water System is experiencing an unplanned service interruption in [ZONE]. Crews are on site. Estimated restoration: [TIME]. Reply STOP to unsubscribe.',
-    boil: '⚠️ BOIL WATER NOTICE — Beulah Park Water System has issued a precautionary boil water advisory for all zones. Please boil tap water for at least 1 minute before drinking or cooking until further notice. A follow-up all-clear will be sent. Reply STOP to unsubscribe.'
+    repair: '🔧 WATER MAIN REPAIR — Beulah Park Water System will be performing repairs. Water service may be interrupted from [TIME] to [TIME]. Please plan accordingly. Reply STOP to unsubscribe.',
+    outage: '🚫 SERVICE OUTAGE — Beulah Park Water System is experiencing an unplanned service interruption. Crews are on site. Estimated restoration: [TIME]. Reply STOP to unsubscribe.',
+    boil: '⚠️ BOIL WATER NOTICE — Beulah Park Water System has issued a precautionary boil water advisory for all connections. Please boil tap water for at least 1 minute before drinking or cooking until further notice. A follow-up all-clear will be sent. Reply STOP to unsubscribe.'
   };
 
   function selectAlertType(card, type) {
@@ -1071,14 +1003,6 @@
     document.getElementById('alert-message').value = templates[type];
     updatePreview();
     updateCharCount();
-    updateCostEstimate();
-  }
-
-  // ─── Recipient Selection ─────────────────────────────────
-  function selectRecipient(btn, mode) {
-    document.querySelectorAll('.recipient-option').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedRecipientMode = mode;
     updateCostEstimate();
   }
 
@@ -1098,13 +1022,12 @@
 
   async function updateCostEstimate() {
     const message = document.getElementById('alert-message').value;
-    const zone = document.getElementById('zone-select').value;
     if (!message) {
       document.getElementById('sms-meta').textContent = 'Select an alert type to begin';
       return;
     }
     try {
-      const estimate = await api('POST', '/api/alerts/estimate', { message, zone });
+      const estimate = await api('POST', '/api/alerts/estimate', { message });
       document.getElementById('sms-meta').textContent =
         `${estimate.segments} segment${estimate.segments > 1 ? 's' : ''} · ~$${estimate.totalCost.toFixed(2)} for ${estimate.recipientCount} recipients`;
     } catch (err) {
@@ -1121,11 +1044,6 @@
     const message = document.getElementById('alert-message').value;
     if (!message.trim()) {
       showToast('Please write a message', 'error');
-      return;
-    }
-
-    if (selectedRecipientMode === 'test') {
-      sendTest();
       return;
     }
 
@@ -1154,8 +1072,7 @@
     try {
       const result = await api('POST', '/api/alerts/send', {
         type: selectedAlertType,
-        message: document.getElementById('alert-message').value,
-        zone: document.getElementById('zone-select').value
+        message: document.getElementById('alert-message').value
       });
 
       closeConfirmModal();
@@ -1224,7 +1141,6 @@
       return `<tr>
         <td><strong>${escapeHtml(sub.name)}</strong></td>
         <td>${displayPhone}</td>
-        <td>${escapeHtml(sub.zone)}</td>
         <td><span class="badge ${statusClass}">${statusLabel}</span></td>
         <td>${optedIn}</td>
         <td>
@@ -1244,7 +1160,6 @@
   async function addSubscriber() {
     const name = document.getElementById('add-name').value.trim();
     const phone = document.getElementById('add-phone').value.trim();
-    const zone = document.getElementById('add-zone').value;
     const status = document.getElementById('add-status').value;
 
     if (!name || !phone) {
@@ -1253,7 +1168,7 @@
     }
 
     try {
-      await api('POST', '/api/subscribers', { name, phone, zone, status });
+      await api('POST', '/api/subscribers', { name, phone, status });
       showToast(`${name} added as subscriber`);
       document.getElementById('add-name').value = '';
       document.getElementById('add-phone').value = '';
@@ -1303,12 +1218,10 @@
       const date = new Date(alert.created_at).toLocaleString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
       });
-      const zoneLabel = alert.zone === 'all' ? 'All Zones' : alert.zone;
-
       return `<div class="log-entry">
         <div class="log-dot ${alert.type}"></div>
         <div class="log-content">
-          <div class="log-title">${typeNames[alert.type] || alert.type} — ${escapeHtml(zoneLabel)}</div>
+          <div class="log-title">${typeNames[alert.type] || alert.type}</div>
           <div class="log-detail">${escapeHtml(alert.message.substring(0, 200))}${alert.message.length > 200 ? '...' : ''}</div>
           <div class="log-stats">
             <span class="log-stat">📤 Sent to <span class="num">${alert.recipient_count}</span></span>

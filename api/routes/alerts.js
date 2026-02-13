@@ -31,11 +31,11 @@ function getTwilioService() {
 /**
  * POST /api/alerts/send
  * Send an alert to subscribers
- * Body: { type, message, zone, recipients }
+ * Body: { type, message }
  */
 router.post('/send', async (req, res) => {
   try {
-    const { type, message, zone } = req.body;
+    const { type, message } = req.body;
 
     // Validate
     if (!type || !['repair', 'outage', 'boil'].includes(type)) {
@@ -45,10 +45,10 @@ router.post('/send', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Get recipients
-    const subscribers = getActiveSubscribers(zone);
+    // Get all active recipients
+    const subscribers = getActiveSubscribers();
     if (subscribers.length === 0) {
-      return res.status(400).json({ error: 'No active subscribers found for the selected zone' });
+      return res.status(400).json({ error: 'No active subscribers found' });
     }
 
     // Estimate cost
@@ -58,7 +58,7 @@ router.post('/send', async (req, res) => {
     const alert = createAlert({
       type,
       message,
-      zone: zone || 'all',
+      zone: 'all',
       recipient_count: subscribers.length,
       cost_estimate: costEstimate.totalCost
     });
@@ -208,16 +208,16 @@ router.get('/:id', (req, res) => {
 /**
  * POST /api/alerts/estimate
  * Get cost estimate without sending
- * Body: { message, zone }
+ * Body: { message }
  */
 router.post('/estimate', (req, res) => {
   try {
-    const { message, zone } = req.body;
+    const { message } = req.body;
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    const subscribers = getActiveSubscribers(zone);
+    const subscribers = getActiveSubscribers();
     const estimate = TwilioService.estimateCost(message.length, subscribers.length);
 
     res.json({

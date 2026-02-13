@@ -119,14 +119,9 @@ export function getAllSubscribers({ search, zone, status } = {}) {
 }
 
 /**
- * Get active subscribers, optionally filtered by zone
+ * Get all active subscribers
  */
-export function getActiveSubscribers(zone) {
-  if (zone && zone !== 'all' && zone !== 'All Zones — System Wide') {
-    return db.prepare(
-      'SELECT * FROM subscribers WHERE status = ? AND zone = ? ORDER BY name'
-    ).all('active', zone);
-  }
+export function getActiveSubscribers() {
   return db.prepare(
     'SELECT * FROM subscribers WHERE status = ? ORDER BY name'
   ).all('active');
@@ -201,15 +196,7 @@ export function getSubscriberStats() {
   const pending = db.prepare("SELECT COUNT(*) as count FROM subscribers WHERE status = 'pending'").get().count;
   const opted_out = db.prepare("SELECT COUNT(*) as count FROM subscribers WHERE status = 'opted_out'").get().count;
 
-  const zoneRows = db.prepare(
-    "SELECT zone, COUNT(*) as count FROM subscribers WHERE status = 'active' GROUP BY zone"
-  ).all();
-  const byZone = {};
-  for (const row of zoneRows) {
-    byZone[row.zone] = row.count;
-  }
-
-  return { total, active, pending, opted_out, byZone };
+  return { total, active, pending, opted_out };
 }
 
 // ─── Alert Queries ──────────────────────────────────────────
