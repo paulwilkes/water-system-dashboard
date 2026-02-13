@@ -11,6 +11,7 @@ import { initDatabase } from './db/database.js';
 import alertRoutes from './api/routes/alerts.js';
 import subscriberRoutes from './api/routes/subscribers.js';
 import refreshData from './api/refresh-data.js';
+import { startMQTT } from './lib/yolink-mqtt.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,11 +48,17 @@ initDatabase();
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Water Dashboard server running on port ${PORT}`);
 
-  // Run initial data refresh on startup
-  console.log('Running initial data refresh...');
-  refreshData()
-    .then(() => console.log('Initial data refresh complete'))
-    .catch(err => console.error('Initial data refresh failed:', err.message));
+  // Start MQTT listener for real-time tank readings
+  console.log('Starting MQTT tank listener...');
+  startMQTT().catch(err => console.error('MQTT startup failed:', err.message));
+
+  // Run initial data refresh on startup (with short delay to let MQTT connect)
+  setTimeout(() => {
+    console.log('Running initial data refresh...');
+    refreshData()
+      .then(() => console.log('Initial data refresh complete'))
+      .catch(err => console.error('Initial data refresh failed:', err.message));
+  }, 5000);
 
   // Refresh data every hour
   const ONE_HOUR = 60 * 60 * 1000;
