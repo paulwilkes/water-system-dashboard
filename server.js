@@ -25,6 +25,19 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Hostname-based routing for optin subdomain
+app.use((req, res, next) => {
+  if (req.hostname === 'optin.beulahparkws.org') {
+    // Allow the subscriber API (needed for the opt-in form POST)
+    if (req.path.startsWith('/api/subscribers')) return next();
+    // Allow static assets (CSS, JS, images, data files)
+    if (req.path.match(/\.(css|js|png|jpg|svg|ico|json|woff2?)$/)) return next();
+    // Everything else → serve opt-in page
+    return res.sendFile(path.join(__dirname, 'public', 'opt-in.html'));
+  }
+  next();
+});
+
 // Serve static files from public/
 app.use(express.static(path.join(__dirname, 'public')));
 
