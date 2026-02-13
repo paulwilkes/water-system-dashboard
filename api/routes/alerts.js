@@ -38,8 +38,8 @@ router.post('/send', async (req, res) => {
     const { type, message } = req.body;
 
     // Validate
-    if (!type || !['repair', 'outage', 'boil'].includes(type)) {
-      return res.status(400).json({ error: 'Invalid alert type. Must be repair, outage, or boil.' });
+    if (!type || !['repair', 'outage', 'boil', 'boil_lifted'].includes(type)) {
+      return res.status(400).json({ error: 'Invalid alert type. Must be repair, outage, boil, or boil_lifted.' });
     }
     if (!message || message.trim().length === 0) {
       return res.status(400).json({ error: 'Message is required' });

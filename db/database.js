@@ -51,7 +51,7 @@ export function initDatabase() {
 
     CREATE TABLE IF NOT EXISTS alerts (
       id              INTEGER PRIMARY KEY AUTOINCREMENT,
-      type            TEXT NOT NULL CHECK(type IN ('repair','outage','boil')),
+      type            TEXT NOT NULL CHECK(type IN ('repair','outage','boil','boil_lifted')),
       message         TEXT NOT NULL,
       zone            TEXT DEFAULT 'all',
       recipient_count INTEGER DEFAULT 0,

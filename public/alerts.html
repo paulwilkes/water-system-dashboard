@@ -250,7 +250,7 @@
   /* ── Send Alert Section ── */
   .alert-type-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 14px;
     margin-bottom: 24px;
   }
@@ -295,6 +295,8 @@
   .alert-type-card:nth-child(1) .alert-type-icon { background: var(--blue-light); }
   .alert-type-card:nth-child(2) .alert-type-icon { background: var(--amber-light); }
   .alert-type-card:nth-child(3) .alert-type-icon { background: var(--red-light); }
+  .alert-type-card:nth-child(4) .alert-type-icon { background: var(--mint-light); }
+  .alert-type-card:nth-child(4) .alert-type-icon { background: var(--mint-light); }
 
   .alert-type-name {
     font-weight: 600;
@@ -520,6 +522,8 @@
   .alert-badge.repair { background: var(--blue-light); color: var(--blue); }
   .alert-badge.outage { background: var(--amber-light); color: #b59a4a; }
   .alert-badge.boil { background: var(--red-light); color: var(--red); }
+  .alert-badge.boil_lifted { background: var(--mint-light); color: #4a9e6e; }
+  .alert-badge.boil_lifted { background: var(--mint-light); color: #4a9e6e; }
 
   /* ── Add Subscriber Form ── */
   .inline-form {
@@ -627,6 +631,7 @@
   .log-dot.repair { background: var(--blue); }
   .log-dot.outage { background: var(--amber); }
   .log-dot.boil { background: var(--red); }
+  .log-dot.boil_lifted { background: var(--mint); }
 
   .log-content { flex: 1; }
 
@@ -804,6 +809,12 @@
             <div class="alert-type-icon">⚠️</div>
             <div class="alert-type-name">Boil Water Notice</div>
             <div class="alert-type-desc">Public health advisory — boil before use</div>
+          </div>
+          <div class="alert-type-card" onclick="selectAlertType(this, 'boil_lifted')">
+            <div class="check-mark">✓</div>
+            <div class="alert-type-icon">✅</div>
+            <div class="alert-type-name">Boil Notice Lifted</div>
+            <div class="alert-type-desc">All-clear — safe to resume normal use</div>
           </div>
         </div>
       </div>
@@ -994,7 +1005,8 @@
   const templates = {
     repair: '🔧 WATER MAIN REPAIR — Beulah Park Water System will be performing repairs. Water service may be interrupted from [TIME] to [TIME]. Please plan accordingly. Reply STOP to unsubscribe.',
     outage: '🚫 SERVICE OUTAGE — Beulah Park Water System is experiencing an unplanned service interruption. Crews are on site. Estimated restoration: [TIME]. Reply STOP to unsubscribe.',
-    boil: '⚠️ BOIL WATER NOTICE — Beulah Park Water System has issued a precautionary boil water advisory for all connections. Please boil tap water for at least 1 minute before drinking or cooking until further notice. A follow-up all-clear will be sent. Reply STOP to unsubscribe.'
+    boil: '⚠️ BOIL WATER NOTICE — Beulah Park Water System has issued a precautionary boil water advisory for all connections. Please boil tap water for at least 1 minute before drinking or cooking until further notice. A follow-up all-clear will be sent. Reply STOP to unsubscribe.',
+    boil_lifted: '✅ BOIL NOTICE LIFTED — The boil water advisory for Beulah Park Water System has been lifted. Tap water is safe to use without boiling. Thank you for your patience. Reply STOP to unsubscribe.'
   };
 
   function selectAlertType(card, type) {
@@ -1048,7 +1060,7 @@
       return;
     }
 
-    const typeNames = { repair: 'Water Main Repair', outage: 'Service Outage', boil: 'Boil Water Notice' };
+    const typeNames = { repair: 'Water Main Repair', outage: 'Service Outage', boil: 'Boil Water Notice', boil_lifted: 'Boil Notice Lifted' };
     const count = statsData ? statsData.active : '?';
     document.getElementById('confirm-message').innerHTML =
       `You are about to send a <strong>${typeNames[selectedAlertType]}</strong> to <strong>${count} subscribers</strong>. This action cannot be undone.`;
@@ -1213,7 +1225,7 @@
       return;
     }
 
-    const typeNames = { repair: 'Water Main Repair', outage: 'Service Outage', boil: 'Boil Water Notice' };
+    const typeNames = { repair: 'Water Main Repair', outage: 'Service Outage', boil: 'Boil Water Notice', boil_lifted: 'Boil Notice Lifted' };
 
     container.innerHTML = alerts.map(alert => {
       const date = new Date(alert.created_at).toLocaleString('en-US', {
