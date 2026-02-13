@@ -4,6 +4,7 @@
  */
 
 import Database from 'better-sqlite3';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -18,6 +19,12 @@ let db;
  * Initialize the database — create tables if they don't exist
  */
 export function initDatabase() {
+  // Ensure the directory exists before opening the database
+  const dbDir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
   db = new Database(DB_PATH);
 
   // Enable WAL mode for better concurrent read performance
