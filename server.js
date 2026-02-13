@@ -33,6 +33,6 @@ app.use('/api/subscribers', subscriberRoutes);
 // Initialize database and start server
 initDatabase();
 
-app.listen(PORT, () => {
-  console.log(`Water Dashboard server running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Water Dashboard server running on port ${PORT}`);
 });
