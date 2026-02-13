@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beulah Park Water System Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #E8F4F8 0%, #F0E8E8 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            color: #2C5F8D;
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            color: #8B9DB3;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            color: #2C5F8D;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card-subtitle {
+            color: #8B9DB3;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        /* Tank Grid */
+        .tank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .tank-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .tank-name {
+            color: #2C5F8D;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .tank-chart-container {
+            position: relative;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .tank-no-sensor {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tank-no-sensor-text {
+            color: #8B9DB3;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .tank-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .tank-stat {
+            flex: 1;
+        }
+
+        .tank-stat-label {
+            color: #8B9DB3;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .tank-stat-value {
+            color: #2C5F8D;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .tank-stat-unit {
+            color: #8B9DB3;
+            font-size: 12px;
+            margin-left: 2px;
+        }
+
+        /* Two column layout */
+        .two-col-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container-tall {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Chlorine Latest Reading Display */
+        .chlorine-current {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .chlorine-reading {
+            flex: 1;
+        }
+
+        .chlorine-value-display {
+            font-size: 56px;
+            font-weight: 700;
+            color: #2C5F8D;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .chlorine-unit {
+            font-size: 24px;
+            color: #8B9DB3;
+            margin-left: 8px;
+        }
+
+        .chlorine-timestamp {
+            color: #8B9DB3;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .chlorine-status {
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .status-indicator {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .status-indicator.good {
+            background: rgba(134, 201, 164, 0.2);
+            color: #4a9a6a;
+        }
+
+        .status-indicator.low {
+            background: rgba(255, 193, 7, 0.2);
+            color: #d68910;
+        }
+
+        .status-indicator.warning {
+            background: rgba(255, 82, 82, 0.2);
+            color: #dc3545;
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2C5F8D;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-label {
+            color: #8B9DB3;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: #2C5F8D;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-unit {
+            color: #8B9DB3;
+            font-size: 14px;
+            margin-left: 4px;
+        }
+
+        .legend-custom {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-label {
+            color: #2C5F8D;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alerts-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #2C5F8D;
+            color: white;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .alerts-btn:hover {
+            background: #1e4a6e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8B9DB3;
+        }
+
+        .error {
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            color: #dc3545;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .tank-grid {
+                grid-template-columns: 1fr;
+            }
+            .two-col-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>🌊 Beulah Park Water System</h1>
+                <div class="subtitle" id="last-update">Loading...</div>
+            </div>
+            <a href="/alerts.html" class="alerts-btn">📢 Alerts</a>
+        </div>
+
+        <div id="loading" class="loading">
+            Loading dashboard data...
+        </div>
+
+        <div id="error" class="error" style="display:none;"></div>
+
+        <div id="dashboard" style="display:none;">
+            <!-- Tank Levels -->
+            <div class="tank-grid" id="tank-grid"></div>
+
+            <!-- Chlorine & Production -->
+            <div class="two-col-grid">
+                <!-- Chlorine Levels -->
+                <div class="card">
+                    <div class="card-title">Chlorine Levels</div>
+                    <div class="card-subtitle">Free Chlorine Monitoring</div>
+                    
+                    <div class="chlorine-current" id="chlorine-current">
+                        <div class="chlorine-reading">
+                            <div class="chlorine-value-display">
+                                <span id="chlorine-value">--</span><span class="chlorine-unit">ppm</span>
+                            </div>
+                            <div class="chlorine-timestamp" id="chlorine-timestamp">No recent data</div>
+                        </div>
+                        <div class="chlorine-status">
+                            <div class="status-indicator good" id="chlorine-status-indicator">?</div>
+                            <div class="status-text" id="chlorine-status-text">Unknown</div>
+                        </div>
+                    </div>
+
+                    <div class="card-subtitle" style="margin-top: 10px; margin-bottom: 15px;">30-Day History</div>
+                    <div class="chart-container">
+                        <canvas id="chlorineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Previous Month Production -->
+                <div class="card" id="monthly-production-card">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Multi-Year Trend Chart -->
+            <div class="card">
+                <div class="card-title">Long-Term Production & Usage Trends</div>
+                <div class="card-subtitle">Average Daily Gallons (Multi-Year)</div>
+                
+                <div class="legend-custom">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #6BBFBD;"></div>
+                        <div class="legend-label">Production</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #FF8B94;"></div>
+                        <div class="legend-label">Usage</div>
+                    </div>
+                </div>
+
+                <div class="chart-container-tall">
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <div class="stats-grid" id="stats-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load and display data
+        async function loadData() {
+            try {
+                const response = await fetch('./data/current.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load data');
+                }
+                const data = await response.json();
+                
+                // Hide loading, show dashboard
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                
+                // Update last update time
+                const updateTime = new Date(data.timestamp).toLocaleString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+                document.getElementById('last-update').textContent = `Last Updated: ${updateTime}`;
+                
+                // Render all sections
+                renderTanks(data.tanks);
+                renderChlorine(data.chlorine);
+                renderRecentMonths(data.production.recentMonths);
+                renderYearlyTrends(data.production.yearly);
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = `Error loading dashboard: ${error.message}. Make sure to run 'npm run refresh' first.`;
+            }
+        }
+
+        // Render tank levels
+        function renderTanks(tanks) {
+            const container = document.getElementById('tank-grid');
+            container.innerHTML = '';
+            
+            tanks.forEach(tank => {
+                const card = document.createElement('div');
+                card.className = 'tank-card';
+                
+                if (tank.status === 'no_sensor') {
+                    card.innerHTML = `
+                        <div class="tank-name">${tank.name}</div>
+                        <div class="tank-no-sensor">
+                            <div class="tank-no-sensor-text">
+                                ${tank.message || 'Sensor not installed'}
+                            </div>
+                        </div>
+                        <div class="tank-stats">
+                            <div class="tank-stat">
+                                <div class="tank-stat-label">Capacity</div>
+                                <div class="tank-stat-value">${tank.capacity?.toLocaleString() || 'N/A'}<span class="tank-stat-unit">gal</span></div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const percentage = tank.percentage || 0;
+                    const hasPercentage = tank.percentage !== null && tank.percentage !== undefined;
+                    const color = tank.status === 'online' ? '#6BBFBD' : '#8B9DB3';
+                    
+                    // Build stats HTML
+                    let statsHTML = `
+                        <div class="tank-stat">
+                            <div class="tank-stat-label">Status</div>
+                            <div class="tank-stat-value">${tank.status === 'online' ? '🟢 Online' : '🔴 Offline'}</div>
+                        </div>
+                    `;
+                    
+                    // Show current gallons if we have it
+                    if (tank.gallons !== null && tank.gallons !== undefined) {
+                        statsHTML += `
+                            <div class="tank-stat">
+                                <div class="tank-stat-label">Current</div>
+                                <div class="tank-stat-value">${tank.gallons.toLocaleString()}<span class="tank-stat-unit">gal</span></div>
+                            </div>
+                        `;
+                    } else if (tank.level !== null && tank.level !== undefined) {
+                        // If no gallons calculated, show depth
+                        statsHTML += `
+                            <div class="tank-stat">
+                                <div class="tank-stat-label">Depth</div>
+                                <div class="tank-stat-value">${tank.level}<span class="tank-stat-unit">${tank.depthUnit || 'cm'}</span></div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add capacity
+                    statsHTML += `
+                        <div class="tank-stat">
+                            <div class="tank-stat-label">Capacity</div>
+                            <div class="tank-stat-value">${tank.capacity?.toLocaleString() || 'N/A'}<span class="tank-stat-unit">gal</span></div>
+                        </div>
+                    `;
+                    
+                    // If no percentage, show text instead of chart
+                    if (!hasPercentage) {
+                        card.innerHTML = `
+                            <div class="tank-name">${tank.name}</div>
+                            <div class="tank-no-sensor">
+                                <div class="tank-no-sensor-text">
+                                    Sensor online<br>
+                                    <strong style="font-size: 24px; color: #2C5F8D;">${tank.level} ${tank.depthUnit || 'cm'}</strong><br>
+                                    <small style="color: #8B9DB3;">Percentage calculation requires tank height calibration</small>
+                                </div>
+                            </div>
+                            <div class="tank-stats">
+                                ${statsHTML}
+                            </div>
+                        `;
+                        container.appendChild(card);
+                        return;
+                    }
+                    
+                    // Otherwise show chart with percentage
+                    card.innerHTML = `
+                        <div class="tank-name">${tank.name}</div>
+                        <div class="tank-chart-container">
+                            <canvas id="tank-${tank.id}"></canvas>
+                        </div>
+                        <div class="tank-stats">
+                            ${statsHTML}
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                    
+                    // Create donut chart (only if hasPercentage)
+                    const tankId = tank.id;
+                    const tankPercentage = percentage;
+                    const tankColor = color;
+                    setTimeout(() => {
+                        const ctx = document.getElementById(`tank-${tankId}`).getContext('2d');
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                datasets: [{
+                                    data: [tankPercentage, 100 - tankPercentage],
+                                    backgroundColor: [tankColor, '#f0f0f0'],
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '75%',
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { enabled: false }
+                                }
+                            },
+                            plugins: [{
+                                id: 'centerText',
+                                afterDraw: (chart) => {
+                                    const ctx = chart.ctx;
+                                    const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+                                    const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+                                    
+                                    ctx.save();
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+                                    ctx.fillStyle = '#2C5F8D';
+                                    ctx.fillText(tankPercentage + '%', centerX, centerY);
+                                    ctx.restore();
+                                }
+                            }]
+                        });
+                    }, 0);
+                    return;
+                }
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Render chlorine data
+        function renderChlorine(chlorine) {
+            if (chlorine.latest) {
+                const latest = chlorine.latest;
+                document.getElementById('chlorine-value').textContent = latest.ppm.toFixed(2);
+                
+                const date = new Date(latest.timestamp).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit'
+                });
+                document.getElementById('chlorine-timestamp').textContent = `Last tested: ${date}`;
+                
+                // Status indicator
+                const indicator = document.getElementById('chlorine-status-indicator');
+                const statusText = document.getElementById('chlorine-status-text');
+                
+                indicator.className = 'status-indicator ' + latest.status;
+                if (latest.status === 'good') {
+                    indicator.textContent = '✓';
+                    statusText.textContent = 'Within Range';
+                } else if (latest.status === 'low') {
+                    indicator.textContent = '⚠';
+                    statusText.textContent = 'Low';
+                } else {
+                    indicator.textContent = '⛔';
+                    statusText.textContent = 'Warning';
+                }
+            }
+            
+            // Render 30-day chart
+            if (chlorine.history && chlorine.history.length > 0) {
+                const ctx = document.getElementById('chlorineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chlorine.history.map(r => new Date(r.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                        datasets: [{
+                            label: 'Free Chlorine (ppm)',
+                            data: chlorine.history.map(r => r.ppm),
+                            borderColor: '#A98CD6',
+                            backgroundColor: 'rgba(169, 140, 214, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#A98CD6',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                titleColor: '#2C5F8D',
+                                bodyColor: '#2C5F8D',
+                                borderColor: '#e9ecef',
+                                borderWidth: 1,
+                                padding: 12,
+                                displayColors: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Chlorine: ' + context.parsed.y.toFixed(2) + ' ppm';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 2.0,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#8B9DB3',
+                                    font: { size: 11 },
+                                    callback: function(value) {
+                                        return value.toFixed(1) + ' ppm';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false, drawBorder: false },
+                                ticks: {
+                                    color: '#8B9DB3',
+                                    font: { size: 10 },
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Render recent months production data
+        function renderRecentMonths(recentMonths) {
+            const card = document.getElementById('monthly-production-card');
+            if (!recentMonths || recentMonths.length === 0) {
+                card.innerHTML = `
+                    <div class="card-title">Recent Production</div>
+                    <div class="card-subtitle">No recent data available</div>
+                `;
+                return;
+            }
+
+            // Build the card content
+            card.innerHTML = `
+                <div class="card-title">Recent Production</div>
+                <div class="card-subtitle">Last ${recentMonths.length} Months</div>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            `;
+
+            // Create labels (e.g., "Jan 2026")
+            const labels = recentMonths.map(m => `${m.monthName} ${m.year}`);
+
+            // Create the bar chart
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Production',
+                            data: recentMonths.map(m => m.production),
+                            backgroundColor: 'rgba(107, 191, 189, 0.8)',
+                            borderColor: '#6BBFBD',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'Usage',
+                            data: recentMonths.map(m => m.usage),
+                            backgroundColor: 'rgba(255, 139, 148, 0.8)',
+                            borderColor: '#FF8B94',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#2C5F8D',
+                                font: { size: 12, weight: '500' },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#2C5F8D',
+                            bodyColor: '#2C5F8D',
+                            borderColor: '#e9ecef',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + 
+                                           context.parsed.y.toLocaleString() + ' gal';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8B9DB3',
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return (value / 1000).toFixed(0) + 'k gal';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                color: '#8B9DB3',
+                                font: { size: 10 }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // Render yearly trends
+        function renderYearlyTrends(yearly) {
+            if (!yearly || yearly.length === 0) return;
+            
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: yearly.map(y => y.year),
+                    datasets: [
+                        {
+                            label: 'Production',
+                            data: yearly.map(y => y.production),
+                            borderColor: '#6BBFBD',
+                            backgroundColor: 'rgba(107, 191, 189, 0.15)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#6BBFBD',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Usage',
+                            data: yearly.map(y => y.usage),
+                            borderColor: '#FF8B94',
+                            backgroundColor: 'rgba(255, 139, 148, 0.15)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#FF8B94',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#2C5F8D',
+                            bodyColor: '#2C5F8D',
+                            borderColor: '#e9ecef',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + 
+                                           context.parsed.y.toFixed(0).toLocaleString() + ' gal/day';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8B9DB3',
+                                font: { size: 12 },
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' gal';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                color: '#2C5F8D',
+                                font: { size: 13, weight: '500' }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+            
+            // Render stats
+            if (yearly.length > 0) {
+                const currentYear = yearly[yearly.length - 1];
+                const firstYear = yearly[0];
+                const buffer = ((currentYear.production - currentYear.usage) / currentYear.production * 100).toFixed(0);
+                const growth = ((currentYear.usage - firstYear.usage) / firstYear.usage * 100).toFixed(0);
+                
+                document.getElementById('stats-grid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-label">${currentYear.year} Avg Production</div>
+                        <div class="stat-value">${currentYear.production.toFixed(0).toLocaleString()}<span class="stat-unit">gal/day</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">${currentYear.year} Avg Usage</div>
+                        <div class="stat-value">${currentYear.usage.toFixed(0).toLocaleString()}<span class="stat-unit">gal/day</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Safety Buffer</div>
+                        <div class="stat-value">${buffer}<span class="stat-unit">% surplus</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">${yearly.length}-Year Growth</div>
+                        <div class="stat-value">+${growth}<span class="stat-unit">% usage</span></div>
+                    </div>
+                `;
+            }
+        }
+
+        // Load on page load
+        loadData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "beulah-park-water-dashboard",
+  "version": "1.0.0",
+  "description": "Water system monitoring dashboard for Beulah Park Water System",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "refresh": "node api/refresh-data.js",
+    "mqtt": "node lib/yolink-mqtt.js",
+    "db:seed": "node db/seed.js",
+    "test:yolink": "node test-yolink.js",
+    "test:sheets": "node test-sheets.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.0",
+    "googleapis": "^171.1.0",
+    "mqtt": "^5.15.0",
+    "node-fetch": "^3.3.2",
+    "twilio": "^5.0.0"
+  }
+}

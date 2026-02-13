@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beulah Park Water System — Alert Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1eb;
+    --card: #ffffff;
+    --coral: #e8927c;
+    --coral-light: #fdf0ec;
+    --mint: #7ec8a4;
+    --mint-light: #edf8f2;
+    --blue: #7caee8;
+    --blue-light: #ecf3fd;
+    --amber: #e8c97c;
+    --amber-light: #fdf6ec;
+    --red: #d9534f;
+    --red-light: #fdecea;
+    --text: #2c2c2c;
+    --text-muted: #8a8a8a;
+    --border: #e8e4de;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 20px rgba(0,0,0,0.1);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── Navigation ── */
+  .top-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--blue), var(--mint));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+  }
+
+  .system-name {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    height: 100%;
+    align-items: center;
+  }
+
+  .nav-tab {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .nav-tab:hover { color: var(--text); background: var(--bg); }
+  .nav-tab.active {
+    color: var(--text);
+    background: var(--coral-light);
+  }
+
+  .top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .admin-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--coral);
+    background: var(--coral-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* ── Main Layout ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .page-header {
+    margin-bottom: 28px;
+  }
+
+  .page-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  /* ── Tab Panels ── */
+  .panel-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .panel-tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: inherit;
+  }
+
+  .panel-tab:hover { color: var(--text); }
+  .panel-tab.active {
+    color: var(--coral);
+    border-bottom-color: var(--coral);
+    font-weight: 600;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Stat Row ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+
+  .stat-card:hover { box-shadow: var(--shadow-hover); }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .stat-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .stat-card.coral .stat-value { color: var(--coral); }
+  .stat-card.mint .stat-value { color: var(--mint); }
+  .stat-card.blue .stat-value { color: var(--blue); }
+  .stat-card.amber .stat-value { color: var(--amber); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 20px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .card-body { padding: 16px 24px 24px; }
+
+  /* ── Send Alert Section ── */
+  .alert-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .alert-type-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+    position: relative;
+  }
+
+  .alert-type-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .alert-type-card.selected {
+    border-color: var(--coral);
+    background: var(--coral-light);
+  }
+
+  .alert-type-card.selected .alert-type-icon {
+    transform: scale(1.1);
+  }
+
+  .alert-type-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 12px;
+    transition: transform 0.2s;
+  }
+
+  .alert-type-card:nth-child(1) .alert-type-icon { background: var(--blue-light); }
+  .alert-type-card:nth-child(2) .alert-type-icon { background: var(--amber-light); }
+  .alert-type-card:nth-child(3) .alert-type-icon { background: var(--red-light); }
+
+  .alert-type-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .alert-type-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .check-mark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--coral);
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .alert-type-card.selected .check-mark { display: flex; }
+
+  /* ── Form Fields ── */
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--card);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    border-color: var(--blue);
+  }
+
+  .form-textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .char-count {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .char-count.over { color: var(--red); font-weight: 600; }
+
+  /* ── Message Preview ── */
+  .sms-preview-wrapper {
+    background: #f9f9f9;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .sms-preview-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .sms-bubble-container {
+    max-width: 320px;
+  }
+
+  .sms-bubble {
+    background: var(--mint);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 18px 18px 4px 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+
+  .sms-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-align: right;
+    max-width: 320px;
+  }
+
+  /* ── Recipient Selector ── */
+  .recipient-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .recipient-option {
+    flex: 1;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    background: none;
+    font-family: inherit;
+  }
+
+  .recipient-option:hover { border-color: var(--blue); }
+  .recipient-option.selected {
+    border-color: var(--coral);
+    background: var(--coral-light);
+  }
+
+  .recipient-option-label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .recipient-option-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .btn-primary {
+    background: var(--coral);
+    color: white;
+  }
+  .btn-primary:hover:not(:disabled) { background: #d4805c; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 2px solid var(--border);
+  }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--text-muted); }
+
+  .btn-danger {
+    background: var(--red);
+    color: white;
+  }
+  .btn-danger:hover:not(:disabled) { background: #c0433f; }
+
+  .btn-mint {
+    background: var(--mint);
+    color: white;
+  }
+  .btn-mint:hover:not(:disabled) { background: #6ab592; }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  /* ── Table ── */
+  .table-wrapper { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  td {
+    padding: 14px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf8; }
+
+  /* ── Tags & Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-active { background: var(--mint-light); color: var(--mint); }
+  .badge-pending { background: var(--amber-light); color: #b59a4a; }
+  .badge-inactive { background: #f0f0f0; color: var(--text-muted); }
+
+  .alert-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .alert-badge.repair { background: var(--blue-light); color: var(--blue); }
+  .alert-badge.outage { background: var(--amber-light); color: #b59a4a; }
+  .alert-badge.boil { background: var(--red-light); color: var(--red); }
+
+  /* ── Add Subscriber Form ── */
+  .inline-form {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 0.8fr auto;
+    gap: 10px;
+    align-items: end;
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .inline-form .form-group { margin-bottom: 0; }
+
+  /* ── Search Bar ── */
+  .search-bar {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .search-bar input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-bar input:focus { border-color: var(--blue); }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* ── Confirmation Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 32px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: modalIn 0.25s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+
+  .modal p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .modal .btn-group { justify-content: flex-end; }
+
+  /* ── Log Entry ── */
+  .log-entry {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .log-dot.repair { background: var(--blue); }
+  .log-dot.outage { background: var(--amber); }
+  .log-dot.boil { background: var(--red); }
+
+  .log-content { flex: 1; }
+
+  .log-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .log-detail {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .log-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  .log-stat {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .log-stat .num { font-weight: 600; color: var(--text); }
+
+  /* ── Toast / Status Messages ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 14px 24px;
+    border-radius: var(--radius-sm);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 300;
+    animation: toastIn 0.3s ease;
+  }
+
+  .toast.success { background: var(--mint); }
+  .toast.error { background: var(--red); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Empty State ── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .alert-type-grid { grid-template-columns: 1fr; }
+    .inline-form { grid-template-columns: 1fr 1fr; }
+    .recipient-options { flex-direction: column; }
+  }
+
+  @media (max-width: 600px) {
+    .stat-row { grid-template-columns: 1fr; }
+    .inline-form { grid-template-columns: 1fr; }
+    .top-bar { padding: 0 16px; }
+    .main { padding: 20px 16px; }
+    .nav-tabs { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <a class="logo-link" href="/">
+      <div class="logo-icon">💧</div>
+      <span class="system-name">Beulah Park Water</span>
+    </a>
+    <nav class="nav-tabs">
+      <a class="nav-tab" href="/">Dashboard</a>
+      <a class="nav-tab active" href="/alerts.html">Alerts</a>
+    </nav>
+  </div>
+  <div class="top-bar-right">
+    <span class="admin-badge">Admin</span>
+  </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="main">
+
+  <div class="page-header">
+    <h1>Text Alert Management</h1>
+    <p>Send emergency notifications and manage subscriber phone numbers</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat-card coral">
+      <div class="stat-label">Subscribers</div>
+      <div class="stat-value" id="stat-subscribers">--</div>
+      <div class="stat-sub" id="stat-subscribers-sub">Loading...</div>
+    </div>
+    <div class="stat-card mint">
+      <div class="stat-label">Delivery Rate</div>
+      <div class="stat-value" id="stat-delivery">--</div>
+      <div class="stat-sub">Last 30 days</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Alerts Sent</div>
+      <div class="stat-value" id="stat-alerts">--</div>
+      <div class="stat-sub">This year</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Monthly Cost</div>
+      <div class="stat-value" id="stat-cost">--</div>
+      <div class="stat-sub">Twilio number only</div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="panel-tabs">
+    <button class="panel-tab active" data-panel="send">Send Alert</button>
+    <button class="panel-tab" data-panel="subscribers">Subscribers</button>
+    <button class="panel-tab" data-panel="history">Alert History</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PANEL: Send Alert                       -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="panel active" id="panel-send">
+
+    <!-- Step 1: Alert Type -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">1. Choose Alert Type</div>
+      </div>
+      <div class="card-body">
+        <div class="alert-type-grid">
+          <div class="alert-type-card" onclick="selectAlertType(this, 'repair')">
+            <div class="check-mark">✓</div>
+            <div class="alert-type-icon">🔧</div>
+            <div class="alert-type-name">Water Main Repair</div>
+            <div class="alert-type-desc">Scheduled maintenance or emergency repair work</div>
+          </div>
+          <div class="alert-type-card" onclick="selectAlertType(this, 'outage')">
+            <div class="check-mark">✓</div>
+            <div class="alert-type-icon">🚫</div>
+            <div class="alert-type-name">Service Outage</div>
+            <div class="alert-type-desc">Unplanned interruption to water service</div>
+          </div>
+          <div class="alert-type-card" onclick="selectAlertType(this, 'boil')">
+            <div class="check-mark">✓</div>
+            <div class="alert-type-icon">⚠️</div>
+            <div class="alert-type-name">Boil Water Notice</div>
+            <div class="alert-type-desc">Public health advisory — boil before use</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Compose -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">2. Compose Message</div>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">Affected Area</label>
+          <select class="form-select" id="zone-select" onchange="updateCostEstimate()">
+            <option value="all">All Zones — System Wide</option>
+            <option value="Zone 1">Zone 1 — Main Loop</option>
+            <option value="Zone 2">Zone 2 — Hilltop</option>
+            <option value="Zone 3">Zone 3 — Lakeside</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea class="form-textarea" id="alert-message" oninput="updatePreview(); updateCharCount(); updateCostEstimate();"
+            placeholder="Describe the situation, affected area, expected duration, and any instructions for residents..."></textarea>
+          <div class="char-count" id="char-count">0 / 320 characters (1 SMS segment)</div>
+        </div>
+
+        <!-- SMS Preview -->
+        <div class="sms-preview-wrapper">
+          <div class="sms-preview-label">Message Preview</div>
+          <div class="sms-bubble-container">
+            <div class="sms-bubble" id="sms-preview-text">
+              Your message will appear here...
+            </div>
+            <div class="sms-meta" id="sms-meta">Select an alert type to begin</div>
+          </div>
+        </div>
+
+        <!-- Recipients -->
+        <div class="form-group">
+          <label class="form-label">Recipients</label>
+          <div class="recipient-options">
+            <button class="recipient-option selected" onclick="selectRecipient(this, 'all')">
+              <div class="recipient-option-label">All Subscribers</div>
+              <div class="recipient-option-desc" id="recipient-all-desc">-- active numbers</div>
+            </button>
+            <button class="recipient-option" onclick="selectRecipient(this, 'zone')">
+              <div class="recipient-option-label">By Zone</div>
+              <div class="recipient-option-desc">Filter by area</div>
+            </button>
+            <button class="recipient-option" onclick="selectRecipient(this, 'test')">
+              <div class="recipient-option-label">Test Only</div>
+              <div class="recipient-option-desc">Send to admin phone</div>
+            </button>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="btn-test" onclick="sendTest()">📱 Send Test to My Phone</button>
+          <button class="btn btn-primary" id="btn-send" onclick="openConfirmModal()">📤 Send to Subscribers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PANEL: Subscribers                      -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="panel" id="panel-subscribers">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Subscriber Directory</div>
+      </div>
+      <div class="card-body">
+
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="subscriber-search" placeholder="Search by name or phone..." oninput="debounceSearch()">
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Zone</th>
+                <th>Status</th>
+                <th>Opted In</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="subscriber-table-body">
+              <tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 32px;">Loading subscribers...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Add Subscriber Inline -->
+        <div class="inline-form">
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" type="text" id="add-name" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" type="tel" id="add-phone" placeholder="(555) 000-0000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Zone</label>
+            <select class="form-select" id="add-zone">
+              <option>Zone 1</option>
+              <option>Zone 2</option>
+              <option>Zone 3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="add-status">
+              <option value="pending">Send Opt-In</option>
+              <option value="active">Pre-Approved</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-mint" onclick="addSubscriber()">+ Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PANEL: Alert History                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="panel" id="panel-history">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Alert History</div>
+      </div>
+      <div class="card-body" id="history-body">
+        <div style="text-align:center; color: var(--text-muted); padding: 32px;">Loading alert history...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Confirmation Modal ── -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3>Confirm Alert Broadcast</h3>
+    <p id="confirm-message">You are about to send an alert. This action cannot be undone.</p>
+    <p id="confirm-cost" style="font-size: 13px; background: var(--amber-light); padding: 10px 14px; border-radius: 8px;"></p>
+    <div class="btn-group">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn btn-danger" id="btn-confirm-send" onclick="confirmSend()">Send Now</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────
+  let selectedAlertType = null;
+  let selectedRecipientMode = 'all';
+  let statsData = null;
+  let searchTimeout = null;
+
+  // ─── API Helper ──────────────────────────────────────────
+  async function api(method, path, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(path, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  }
+
+  // ─── Toast Notifications ─────────────────────────────────
+  function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  }
+
+  // ─── Tab Switching ───────────────────────────────────────
+  document.querySelectorAll('.panel-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const panelId = 'panel-' + tab.dataset.panel;
+      document.getElementById(panelId).classList.add('active');
+
+      // Load data when switching to a panel
+      if (tab.dataset.panel === 'subscribers') loadSubscribers();
+      if (tab.dataset.panel === 'history') loadHistory();
+    });
+  });
+
+  // ─── Load Dashboard Stats ────────────────────────────────
+  async function loadStats() {
+    try {
+      statsData = await api('GET', '/api/subscribers/stats');
+      document.getElementById('stat-subscribers').textContent = statsData.active;
+      document.getElementById('stat-subscribers-sub').textContent = `${statsData.pending} pending opt-in`;
+      document.getElementById('stat-delivery').textContent = statsData.deliveryRate + '%';
+      document.getElementById('stat-alerts').textContent = statsData.alertsThisYear;
+      document.getElementById('stat-cost').textContent = '$' + statsData.monthlyCost.toFixed(2);
+      document.getElementById('recipient-all-desc').textContent = `${statsData.active} active numbers`;
+    } catch (err) {
+      console.error('Failed to load stats:', err);
+    }
+  }
+
+  // ─── Alert Type Selection ────────────────────────────────
+  const templates = {
+    repair: '🔧 WATER MAIN REPAIR — Beulah Park Water System will be performing repairs in [ZONE]. Water service may be interrupted from [TIME] to [TIME]. Please plan accordingly. Reply STOP to unsubscribe.',
+    outage: '🚫 SERVICE OUTAGE — Beulah Park Water System is experiencing an unplanned service interruption in [ZONE]. Crews are on site. Estimated restoration: [TIME]. Reply STOP to unsubscribe.',
+    boil: '⚠️ BOIL WATER NOTICE — Beulah Park Water System has issued a precautionary boil water advisory for all zones. Please boil tap water for at least 1 minute before drinking or cooking until further notice. A follow-up all-clear will be sent. Reply STOP to unsubscribe.'
+  };
+
+  function selectAlertType(card, type) {
+    document.querySelectorAll('.alert-type-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedAlertType = type;
+    document.getElementById('alert-message').value = templates[type];
+    updatePreview();
+    updateCharCount();
+    updateCostEstimate();
+  }
+
+  // ─── Recipient Selection ─────────────────────────────────
+  function selectRecipient(btn, mode) {
+    document.querySelectorAll('.recipient-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedRecipientMode = mode;
+    updateCostEstimate();
+  }
+
+  // ─── Preview & Character Count ───────────────────────────
+  function updatePreview() {
+    const text = document.getElementById('alert-message').value;
+    document.getElementById('sms-preview-text').textContent = text || 'Your message will appear here...';
+  }
+
+  function updateCharCount() {
+    const len = document.getElementById('alert-message').value.length;
+    const segments = Math.ceil(len / 160) || 1;
+    const el = document.getElementById('char-count');
+    el.textContent = `${len} / 320 characters (${segments} SMS segment${segments > 1 ? 's' : ''})`;
+    el.classList.toggle('over', len > 320);
+  }
+
+  async function updateCostEstimate() {
+    const message = document.getElementById('alert-message').value;
+    const zone = document.getElementById('zone-select').value;
+    if (!message) {
+      document.getElementById('sms-meta').textContent = 'Select an alert type to begin';
+      return;
+    }
+    try {
+      const estimate = await api('POST', '/api/alerts/estimate', { message, zone });
+      document.getElementById('sms-meta').textContent =
+        `${estimate.segments} segment${estimate.segments > 1 ? 's' : ''} · ~$${estimate.totalCost.toFixed(2)} for ${estimate.recipientCount} recipients`;
+    } catch (err) {
+      // Silently fail — not critical
+    }
+  }
+
+  // ─── Send Alert Flow ─────────────────────────────────────
+  function openConfirmModal() {
+    if (!selectedAlertType) {
+      showToast('Please select an alert type first', 'error');
+      return;
+    }
+    const message = document.getElementById('alert-message').value;
+    if (!message.trim()) {
+      showToast('Please write a message', 'error');
+      return;
+    }
+
+    if (selectedRecipientMode === 'test') {
+      sendTest();
+      return;
+    }
+
+    const typeNames = { repair: 'Water Main Repair', outage: 'Service Outage', boil: 'Boil Water Notice' };
+    const count = statsData ? statsData.active : '?';
+    document.getElementById('confirm-message').innerHTML =
+      `You are about to send a <strong>${typeNames[selectedAlertType]}</strong> to <strong>${count} subscribers</strong>. This action cannot be undone.`;
+
+    const segments = Math.ceil(message.length / 160) || 1;
+    const cost = (segments * 0.0079 * count).toFixed(2);
+    document.getElementById('confirm-cost').innerHTML =
+      `Estimated cost: <strong>$${cost}</strong> · ${segments} SMS segment${segments > 1 ? 's' : ''} per recipient`;
+
+    document.getElementById('confirm-modal').classList.add('open');
+  }
+
+  function closeConfirmModal() {
+    document.getElementById('confirm-modal').classList.remove('open');
+  }
+
+  async function confirmSend() {
+    const btn = document.getElementById('btn-confirm-send');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      const result = await api('POST', '/api/alerts/send', {
+        type: selectedAlertType,
+        message: document.getElementById('alert-message').value,
+        zone: document.getElementById('zone-select').value
+      });
+
+      closeConfirmModal();
+      showToast(`Alert sent! ${result.delivered_count} delivered, ${result.failed_count} failed`);
+      loadStats();
+    } catch (err) {
+      closeConfirmModal();
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send Now';
+    }
+  }
+
+  async function sendTest() {
+    const message = document.getElementById('alert-message').value;
+    if (!message.trim()) {
+      showToast('Please write a message first', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('btn-test');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      await api('POST', '/api/alerts/test', { message });
+      showToast('Test message sent to your admin phone!');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '📱 Send Test to My Phone';
+    }
+  }
+
+  // ─── Subscribers Panel ───────────────────────────────────
+  async function loadSubscribers(search) {
+    try {
+      const params = search ? `?search=${encodeURIComponent(search)}` : '';
+      const subscribers = await api('GET', `/api/subscribers${params}`);
+      renderSubscriberTable(subscribers);
+    } catch (err) {
+      console.error('Failed to load subscribers:', err);
+    }
+  }
+
+  function renderSubscriberTable(subscribers) {
+    const tbody = document.getElementById('subscriber-table-body');
+    if (subscribers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding: 32px;">No subscribers found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = subscribers.map(sub => {
+      const statusClass = sub.status === 'active' ? 'badge-active' :
+                          sub.status === 'pending' ? 'badge-pending' : 'badge-inactive';
+      const statusLabel = sub.status === 'active' ? 'Active' :
+                          sub.status === 'pending' ? 'Pending' : 'Opted Out';
+      const optedIn = sub.opted_in_at
+        ? new Date(sub.opted_in_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '—';
+      // Format phone for display
+      const displayPhone = formatPhoneDisplay(sub.phone);
+
+      return `<tr>
+        <td><strong>${escapeHtml(sub.name)}</strong></td>
+        <td>${displayPhone}</td>
+        <td>${escapeHtml(sub.zone)}</td>
+        <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+        <td>${optedIn}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="deleteSubscriberConfirm(${sub.id}, '${escapeHtml(sub.name)}')">Remove</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function debounceSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      loadSubscribers(document.getElementById('subscriber-search').value);
+    }, 300);
+  }
+
+  async function addSubscriber() {
+    const name = document.getElementById('add-name').value.trim();
+    const phone = document.getElementById('add-phone').value.trim();
+    const zone = document.getElementById('add-zone').value;
+    const status = document.getElementById('add-status').value;
+
+    if (!name || !phone) {
+      showToast('Name and phone are required', 'error');
+      return;
+    }
+
+    try {
+      await api('POST', '/api/subscribers', { name, phone, zone, status });
+      showToast(`${name} added as subscriber`);
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-phone').value = '';
+      loadSubscribers();
+      loadStats();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  async function deleteSubscriberConfirm(id, name) {
+    if (!confirm(`Remove ${name} from the subscriber list?`)) return;
+    try {
+      await api('DELETE', `/api/subscribers/${id}`);
+      showToast(`${name} removed`);
+      loadSubscribers();
+      loadStats();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  }
+
+  // ─── Alert History Panel ─────────────────────────────────
+  async function loadHistory() {
+    try {
+      const alerts = await api('GET', '/api/alerts/history');
+      renderHistory(alerts);
+    } catch (err) {
+      console.error('Failed to load history:', err);
+    }
+  }
+
+  function renderHistory(alerts) {
+    const container = document.getElementById('history-body');
+    if (alerts.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <p>No alerts have been sent yet. When you send your first alert, it will appear here.</p>
+        </div>`;
+      return;
+    }
+
+    const typeNames = { repair: 'Water Main Repair', outage: 'Service Outage', boil: 'Boil Water Notice' };
+
+    container.innerHTML = alerts.map(alert => {
+      const date = new Date(alert.created_at).toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
+      });
+      const zoneLabel = alert.zone === 'all' ? 'All Zones' : alert.zone;
+
+      return `<div class="log-entry">
+        <div class="log-dot ${alert.type}"></div>
+        <div class="log-content">
+          <div class="log-title">${typeNames[alert.type] || alert.type} — ${escapeHtml(zoneLabel)}</div>
+          <div class="log-detail">${escapeHtml(alert.message.substring(0, 200))}${alert.message.length > 200 ? '...' : ''}</div>
+          <div class="log-stats">
+            <span class="log-stat">📤 Sent to <span class="num">${alert.recipient_count}</span></span>
+            <span class="log-stat">✅ Delivered <span class="num">${alert.delivered_count}</span></span>
+            <span class="log-stat">❌ Failed <span class="num">${alert.failed_count}</span></span>
+            <span class="log-stat">🕐 ${date}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ─── Utilities ───────────────────────────────────────────
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function formatPhoneDisplay(phone) {
+    // Convert +15551234567 to (555) 123-4567
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('1')) {
+      const area = digits.substring(1, 4);
+      const prefix = digits.substring(4, 7);
+      const line = digits.substring(7, 11);
+      return `(${area}) ${prefix}-${line}`;
+    }
+    return phone;
+  }
+
+  // ─── Initialize ──────────────────────────────────────────
+  loadStats();
+  updateCharCount();
+</script>
+
+</body>
+</html>
