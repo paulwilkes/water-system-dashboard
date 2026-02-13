@@ -19,5 +19,8 @@
     "mqtt": "^5.15.0",
     "node-fetch": "^3.3.2",
     "twilio": "^5.0.0"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.10"
   }
 }
