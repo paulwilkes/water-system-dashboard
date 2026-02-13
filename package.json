@@ -8,6 +8,7 @@
     "refresh": "node api/refresh-data.js",
     "mqtt": "node lib/yolink-mqtt.js",
     "db:seed": "node db/seed.js",
+    "sensor-events": "node lib/view-sensor-events.js",
     "test:yolink": "node test-yolink.js",
     "test:sheets": "node test-sheets.js"
   },
