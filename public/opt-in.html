@@ -175,6 +175,15 @@
     cursor: pointer;
   }
 
+  .consent-label a {
+    color: var(--coral);
+    text-decoration: underline;
+  }
+
+  .consent-label a:hover {
+    color: #d4815d;
+  }
+
   /* ── Submit Button ── */
   .submit-btn {
     width: 100%;
@@ -347,7 +356,7 @@
       <div class="consent-group">
         <label class="consent-label">
           <input type="checkbox" id="consent" name="consent" required>
-          <span>I agree to receive automated SMS alerts from Beulah Park Water System regarding water service disruptions, repairs, and boil water notices. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe at any time.</span>
+          <span>I agree to receive automated SMS alerts from Beulah Park Water System regarding water service disruptions, repairs, and boil water notices. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe at any time. I have read and agree to the <a href="/terms.html" target="_blank">SMS Terms &amp; Conditions</a> and <a href="/privacy.html" target="_blank">Privacy Policy</a>.</span>
         </label>
       </div>
 
@@ -388,7 +397,9 @@
   </div>
 
   <div class="footer">
-    &copy; 2026 Beulah Park Water System
+    <a href="/privacy.html" style="color: var(--text-muted); text-decoration: none; margin-right: 16px;">Privacy Policy</a>
+    <a href="/terms.html" style="color: var(--text-muted); text-decoration: none;">Terms &amp; Conditions</a>
+    <div style="margin-top: 8px;">&copy; 2026 Beulah Park Water System</div>
   </div>
 </div>
 

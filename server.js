@@ -32,6 +32,9 @@ app.use((req, res, next) => {
     if (req.path.startsWith('/api/subscribers')) return next();
     // Allow static assets (CSS, JS, images, data files)
     if (req.path.match(/\.(css|js|png|jpg|svg|ico|json|woff2?)$/)) return next();
+    // Allow privacy and terms pages
+    if (req.path === '/privacy.html') return res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+    if (req.path === '/terms.html') return res.sendFile(path.join(__dirname, 'public', 'terms.html'));
     // Everything else → serve opt-in page
     return res.sendFile(path.join(__dirname, 'public', 'opt-in.html'));
   }
