@@ -14,9 +14,16 @@ import {
   getDeliveryRate,
   getAlertsThisYear
 } from '../../db/database.js';
+import { requireAuth } from '../../lib/auth.js';
 import TwilioService from '../../lib/twilio.js';
 
 const router = Router();
+
+// POST / (opt-in signup) is public; all other routes require auth
+router.use((req, res, next) => {
+  if (req.method === 'POST' && req.path === '/') return next();
+  return requireAuth(req, res, next);
+});
 
 /**
  * GET /api/subscribers

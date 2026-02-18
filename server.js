@@ -1,13 +1,19 @@
 /**
  * Beulah Park Water System — Express Server
  * Serves the dashboard static files and alert system API
+ * Protected by Google OAuth with SQLite-backed allowlist
  */
 
 import express from 'express';
+import session from 'express-session';
+import SqliteStore from 'better-sqlite3-session-store';
+import passport from 'passport';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDatabase } from './db/database.js';
+import { initDatabase, getDb } from './db/database.js';
+import { configurePassport } from './lib/passport.js';
+import { requireAuth, redirectIfAuthenticated } from './lib/auth.js';
 import alertRoutes from './api/routes/alerts.js';
 import subscriberRoutes from './api/routes/subscribers.js';
 import refreshData from './api/refresh-data.js';
@@ -18,14 +24,43 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+// Initialize database BEFORE session store (needs the db instance)
+initDatabase();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ── Body Parsing ──
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Hostname-based routing for optin subdomain
+// ── Sessions (SQLite-backed) ──
+const SqliteStoreSession = SqliteStore(session);
+
+app.use(session({
+  store: new SqliteStoreSession({
+    client: getDb(),
+    expired: { clear: true, intervalMs: 900000 }
+  }),
+  secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
+  },
+  name: 'bpws.sid'
+}));
+
+// ── Passport ──
+configurePassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+// ── Hostname-based routing for optin subdomain ──
+// This runs BEFORE auth so the optin subdomain is fully public
 app.use((req, res, next) => {
   if (req.hostname === 'optin.beulahparkws.org') {
     // Allow the subscriber API (needed for the opt-in form POST)
@@ -41,15 +76,65 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from public/
+// ── OAuth Routes (public) ──
+app.get('/auth/google',
+  redirectIfAuthenticated,
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login.html?error=unauthorized'
+  }),
+  (req, res) => {
+    const returnTo = req.session.returnTo || '/';
+    delete req.session.returnTo;
+    res.redirect(returnTo);
+  }
+);
+
+app.post('/auth/logout', (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    req.session.destroy(() => {
+      res.redirect('/login.html');
+    });
+  });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ authenticated: false });
+  }
+  res.json({ authenticated: true, email: req.user.email, name: req.user.name });
+});
+
+// ── Login page (public, redirect if already authenticated) ──
+app.get('/login.html', redirectIfAuthenticated, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// ── Protected HTML pages (BEFORE express.static so these take priority) ──
+app.get('/', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/index.html', requireAuth, (req, res) => {
+  res.redirect('/');
+});
+
+app.get('/alerts.html', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'alerts.html'));
+});
+
+// ── Static files (CSS, JS, images, opt-in, privacy, terms, data) ──
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API routes
-app.use('/api/alerts', alertRoutes);
-app.use('/api/subscribers', subscriberRoutes);
+// ── Protected API routes ──
+app.use('/api/alerts', requireAuth, alertRoutes);
+app.use('/api/subscribers', subscriberRoutes);  // mixed auth handled inside router
 
-// API endpoint to trigger a manual refresh
-app.get('/api/refresh', async (req, res) => {
+app.get('/api/refresh', requireAuth, async (req, res) => {
   try {
     await refreshData();
     res.json({ message: 'Data refreshed', timestamp: new Date().toISOString() });
@@ -58,9 +143,7 @@ app.get('/api/refresh', async (req, res) => {
   }
 });
 
-// Initialize database and start server
-initDatabase();
-
+// ── Start Server ──
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Water Dashboard server running on port ${PORT}`);
 

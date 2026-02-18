@@ -79,6 +79,16 @@ export function initDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_alert_log_alert_id ON alert_log(alert_id);
     CREATE INDEX IF NOT EXISTS idx_alert_log_status ON alert_log(status);
+
+    CREATE TABLE IF NOT EXISTS allowed_users (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      email      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      name       TEXT,
+      added_by   TEXT,
+      added_at   TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_allowed_users_email ON allowed_users(email);
   `);
 
   console.log('Database initialized at', DB_PATH);
@@ -297,6 +307,30 @@ export function getDeliveryRate() {
 
   if (!stats || stats.total === 0) return 100;
   return Math.round((stats.delivered / stats.total) * 100);
+}
+
+// ─── Allowed Users Queries ───────────────────────────────────
+
+export function isEmailAllowed(email) {
+  const row = db.prepare(
+    'SELECT id FROM allowed_users WHERE email = ?'
+  ).get(email.toLowerCase());
+  return !!row;
+}
+
+export function getAllowedUsers() {
+  return db.prepare('SELECT * FROM allowed_users ORDER BY added_at DESC').all();
+}
+
+export function addAllowedUser({ email, name, added_by }) {
+  return db.prepare(`
+    INSERT INTO allowed_users (email, name, added_by)
+    VALUES (@email, @name, @added_by)
+  `).run({ email: email.toLowerCase(), name: name || null, added_by: added_by || 'admin' });
+}
+
+export function removeAllowedUser(email) {
+  return db.prepare('DELETE FROM allowed_users WHERE email = ?').run(email.toLowerCase());
 }
 
 // ─── Utilities ──────────────────────────────────────────────

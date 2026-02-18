@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Beulah Park Water System</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --card: #ffffff;
+            --coral: #e8927c;
+            --text: #2c2c2c;
+            --text-muted: #8a8a8a;
+            --border: #e8e4de;
+            --red: #d9534f;
+            --red-light: #fdecea;
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0a0a1a;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Fullscreen pixel art canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            object-fit: cover;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: var(--radius);
+            padding: 48px 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+            margin: 24px;
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-google:hover {
+            border-color: var(--coral);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .google-icon { width: 20px; height: 20px; }
+
+        .error-msg {
+            background: var(--red-light);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            color: var(--red);
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .error-msg.visible { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="login-card">
+        <img class="login-logo" src="/images/bpws-logo.png" alt="BPWS">
+        <h1 class="login-title">Beulah Park Water</h1>
+        <p class="login-subtitle">Sign in to access the water system dashboard and alert management.</p>
+
+        <div class="error-msg" id="error-msg">
+            Your Google account is not authorized to access this system.
+            Contact the system administrator to request access.
+        </div>
+
+        <a class="btn-google" href="/auth/google">
+            <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Sign in with Google
+        </a>
+    </div>
+
+    <script>
+        // Error message display
+        if (new URLSearchParams(window.location.search).get('error') === 'unauthorized') {
+            document.getElementById('error-msg').classList.add('visible');
+        }
+
+        // ── PNW Pixel Art Background Animation ──
+        const C = document.getElementById('bg-canvas');
+        const X = C.getContext('2d');
+        const W = 320, H = 200;
+        C.width = W; C.height = H;
+
+        let f = 0;
+
+        function r(x, y, w, h, c) {
+          X.fillStyle = c;
+          X.fillRect(Math.floor(x), Math.floor(y), w, h || 1);
+        }
+        function ra(x, y, w, h, c, a) {
+          X.globalAlpha = a;
+          X.fillStyle = c;
+          X.fillRect(Math.floor(x), Math.floor(y), w, h || 1);
+          X.globalAlpha = 1;
+        }
+
+        // SKY
+        function drawSky() {
+          const bands = [
+            [0,   16, '#111133'],
+            [16,  32, '#1a1a44'],
+            [32,  46, '#2a3366'],
+            [46,  58, '#3a5588'],
+            [58,  70, '#4a7099'],
+            [70,  80, '#6090aa'],
+            [80,  88, '#78aabb'],
+            [88,  95, '#90c0cc'],
+          ];
+          bands.forEach(([y0, y1, c]) => r(0, y0, W, y1 - y0, c));
+        }
+
+        // SUN
+        function drawSun() {
+          const sx = 248, sy = 74;
+          for (let ring = 16; ring >= 1; ring--) {
+            const alpha = 0.02 + (16 - ring) * 0.008;
+            for (let dy = -ring; dy <= ring; dy++) {
+              const rw = Math.floor(Math.sqrt(ring * ring - dy * dy));
+              ra(sx - rw, sy + dy, rw * 2, 1, '#ffcc66', alpha);
+            }
+          }
+          for (let dy = -4; dy <= 4; dy++) {
+            const rw = Math.floor(Math.sqrt(16 - dy * dy));
+            r(sx - rw, sy + dy, rw * 2, 1, '#fff4cc');
+          }
+          for (let dy = -2; dy <= 2; dy++) {
+            const rw = Math.floor(Math.sqrt(4 - dy * dy));
+            r(sx - rw, sy + dy, rw * 2, 1, '#fffff0');
+          }
+        }
+
+        // CLOUDS
+        const clouds = [
+          { x: 20, y: 14, shape: [
+            [4, 0, 12, 3], [2, 3, 18, 4], [0, 5, 22, 3], [3, 7, 16, 2]
+          ], spd: 0.07 },
+          { x: 100, y: 8, shape: [
+            [6, 0, 14, 3], [3, 2, 22, 4], [0, 4, 28, 4], [4, 7, 20, 2]
+          ], spd: 0.05 },
+          { x: 210, y: 18, shape: [
+            [3, 0, 10, 2], [1, 2, 16, 3], [0, 4, 18, 3], [2, 6, 14, 2]
+          ], spd: 0.08 },
+          { x: 280, y: 6, shape: [
+            [5, 0, 16, 3], [2, 2, 24, 5], [0, 6, 28, 3], [5, 8, 18, 2]
+          ], spd: 0.06 },
+        ];
+
+        function drawClouds() {
+          clouds.forEach(cl => {
+            const ox = ((cl.x + f * cl.spd) % (W + 40)) - 20;
+            cl.shape.forEach(([dx, dy, w, h]) => {
+              ra(ox + dx + 1, cl.y + dy + 1, w, h, '#6688aa', 0.25);
+            });
+            cl.shape.forEach(([dx, dy, w, h]) => {
+              r(ox + dx, cl.y + dy, w, h, '#d8e8f0');
+            });
+            cl.shape.slice(0, 2).forEach(([dx, dy, w]) => {
+              ra(ox + dx + 1, cl.y + dy, w - 2, 1, '#f0f8ff', 0.6);
+            });
+          });
+        }
+
+        // MOUNTAINS
+        function buildJaggedProfile(peaks, baseY) {
+          const hmap = new Float32Array(W).fill(baseY);
+          peaks.forEach(pk => {
+            for (let x = pk.x - pk.wL; x < pk.x; x++) {
+              if (x < 0 || x >= W) continue;
+              const t = (x - (pk.x - pk.wL)) / pk.wL;
+              let h = baseY - (baseY - pk.y) * t;
+              const stepW = 3 + (pk.seed % 3);
+              const block = Math.floor(x / stepW);
+              const jag = ((block * 7 + pk.seed * 13) % 7) - 3;
+              h += jag;
+              hmap[x] = Math.min(hmap[x], Math.floor(h));
+            }
+            for (let x = pk.x; x <= pk.x + pk.wR; x++) {
+              if (x < 0 || x >= W) continue;
+              const t = (x - pk.x) / pk.wR;
+              let h = pk.y + (baseY - pk.y) * t;
+              const stepW = 3 + ((pk.seed + 1) % 3);
+              const block = Math.floor(x / stepW);
+              const jag = ((block * 11 + pk.seed * 7) % 7) - 3;
+              h += jag;
+              hmap[x] = Math.min(hmap[x], Math.floor(h));
+            }
+          });
+          for (let x = 0; x < W; x++) {
+            if (hmap[x] < baseY) {
+              hmap[x] = Math.floor(hmap[x] / 2) * 2;
+            }
+          }
+          return hmap;
+        }
+
+        function drawMountainLayer(hmap, baseY, colors) {
+          const { rock, rockDk, rockLt, snow, snowSh, snowLine } = colors;
+          for (let x = 0; x < W; x++) {
+            const top = hmap[x];
+            if (top >= baseY) continue;
+            for (let y = Math.floor(top); y < baseY; y++) {
+              const fromTop = y - top;
+              const th = ((x * 7 + y * 13) % 17);
+              const snowEdge = snowLine + (((x * 3 + 5) % 7) - 3);
+              const isSnow = fromTop < snowEdge;
+              if (isSnow) {
+                const slope = (x < W - 1) ? (hmap[x + 1] - hmap[x]) : 0;
+                if (slope > 1 || th < 4) r(x, y, 1, 1, snowSh);
+                else if (th < 7) r(x, y, 1, 1, '#eef4f8');
+                else r(x, y, 1, 1, snow);
+              } else {
+                if (th < 3) r(x, y, 1, 1, rockDk);
+                else if (th < 8) r(x, y, 1, 1, rock);
+                else if (th < 11) r(x, y, 1, 1, rockLt);
+                else r(x, y, 1, 1, rock);
+                if (x % 9 < 1 && fromTop > snowLine + 2) r(x, y, 1, 1, rockDk);
+                if (y % 7 < 1 && th > 10) r(x, y, 1, 1, rockLt);
+              }
+            }
+          }
+          for (let x = 1; x < W - 1; x++) {
+            const top = Math.floor(hmap[x]);
+            if (top < baseY && (hmap[x - 1] > top + 1 || hmap[x + 1] > top + 1)) {
+              r(x, top, 1, 1, colors.rockDk);
+            }
+          }
+        }
+
+        function drawMountains() {
+          const baseY = 95;
+          const backH = buildJaggedProfile([
+            { x: 25,  y: 38, wL: 30, wR: 25, seed: 3 },
+            { x: 70,  y: 30, wL: 38, wR: 32, seed: 7 },
+            { x: 115, y: 42, wL: 28, wR: 32, seed: 2 },
+            { x: 160, y: 26, wL: 42, wR: 48, seed: 5 },
+            { x: 218, y: 34, wL: 32, wR: 38, seed: 9 },
+            { x: 265, y: 40, wL: 30, wR: 28, seed: 4 },
+            { x: 305, y: 46, wL: 28, wR: 22, seed: 6 },
+          ], baseY);
+          drawMountainLayer(backH, baseY, {
+            rock: '#4466888', rockDk: '#334466', rockLt: '#5577aa',
+            snow: '#dce8f4', snowSh: '#a0b8cc', snowLine: 14
+          });
+          const frontH = buildJaggedProfile([
+            { x: 10,  y: 52, wL: 22, wR: 28, seed: 11 },
+            { x: 55,  y: 40, wL: 38, wR: 30, seed: 8 },
+            { x: 100, y: 48, wL: 28, wR: 32, seed: 3 },
+            { x: 145, y: 34, wL: 40, wR: 45, seed: 13 },
+            { x: 200, y: 42, wL: 32, wR: 38, seed: 6 },
+            { x: 250, y: 36, wL: 38, wR: 32, seed: 10 },
+            { x: 298, y: 48, wL: 30, wR: 26, seed: 2 },
+          ], baseY);
+          drawMountainLayer(frontH, baseY, {
+            rock: '#2a4470', rockDk: '#1a3058', rockLt: '#3a5588',
+            snow: '#e4eef8', snowSh: '#8aaccc', snowLine: 10
+          });
+        }
+
+        // WATER
+        function drawWater() {
+          const WT = 95;
+          const bands = [
+            [WT, WT+8,  '#5a90b0'],
+            [WT+8, WT+25, '#4a7898'],
+            [WT+25, WT+50, '#3a6080'],
+            [WT+50, WT+75, '#2a4868'],
+            [WT+75, H,     '#1a3050'],
+          ];
+          bands.forEach(([y0, y1, c]) => r(0, y0, W, y1 - y0, c));
+          for (let y = WT; y < H; y += 2) {
+            const phase = f * 0.12 + y * 0.4;
+            const x1 = Math.floor((Math.sin(phase) * 0.5 + 0.5) * W);
+            const len = 3 + Math.floor(Math.sin(phase * 0.7 + y) * 2);
+            const fade = Math.max(0, 0.15 - (y - WT) * 0.001);
+            if (fade > 0.02) ra(x1 % W, y, Math.abs(len), 1, '#80c8e0', fade);
+            const x2 = Math.floor((Math.cos(phase * 0.8 + 2) * 0.5 + 0.5) * W);
+            if (fade > 0.03) ra(x2 % W, y, Math.abs(len - 1), 1, '#6ab0d0', fade * 0.7);
+          }
+          for (let y = WT; y < WT + 55; y += 1) {
+            const wobble = Math.sin(f * 0.18 + y * 0.6) * (3 + (y - WT) * 0.06);
+            const w = Math.max(1, 6 - Math.floor((y - WT) * 0.08));
+            const alpha = Math.max(0, 0.12 - (y - WT) * 0.002);
+            ra(248 + wobble - w / 2, y, w, 1, '#ffdd88', alpha);
+          }
+        }
+
+        // ISLANDS
+        function drawIslandShape(cx, cy, w, h) {
+          for (let y = 0; y <= h; y++) {
+            const t = y / h;
+            const baseW = w * Math.sin(t * Math.PI * 0.5 + 0.3);
+            const halfW = Math.floor(baseW / 2);
+            let c = t < 0.2 ? '#5aaa5a' : t < 0.5 ? '#3a8a3a' : t < 0.8 ? '#2a6a2a' : '#1a5a2a';
+            r(cx - halfW, cy + y, halfW * 2, 1, c);
+          }
+          r(cx - Math.floor(w * 0.3), cy + h, Math.floor(w * 0.6), 1, '#4a7a4a');
+          r(cx + 2, cy + h, 4, 1, '#5a6a7a');
+          r(cx + Math.floor(w * 0.3), cy + h + 1, 2, 1, '#5a6a7a');
+        }
+
+        function drawEvergreen(x, y, size) {
+          const s = size;
+          const tw = Math.max(1, Math.ceil(1.5 * s));
+          r(x, y - Math.ceil(2 * s) + 1, tw, Math.ceil(2 * s), '#3a2a1a');
+          [
+            { yOff: -3, w: 6, h: 4, c: '#1a4a1a' },
+            { yOff: -7, w: 5, h: 5, c: '#2a5a2a' },
+            { yOff: -11, w: 4, h: 5, c: '#2a6a2a' },
+          ].forEach(t => {
+            const tW = Math.ceil(t.w * s), tH = Math.ceil(t.h * s);
+            const tY = y + Math.floor(t.yOff * s);
+            for (let row = 0; row < tH; row++) {
+              const rW = Math.max(1, Math.floor(tW * (0.2 + (row / tH) * 0.8)));
+              r(x + Math.floor(tw / 2) - Math.floor(rW / 2), tY + row, rW, 1, t.c);
+            }
+          });
+          ra(x, y + Math.floor(-9 * s), 1, Math.ceil(3 * s), '#3a8a3a', 0.7);
+          r(x + Math.floor(tw / 2), y + Math.floor(-11 * s), 1, 1, '#2a6a2a');
+        }
+
+        const islandData = [
+          { cx: 75, cy: 104, w: 60, h: 12, trees: [
+            [-18,0.7],[-12,0.9],[-6,0.6],[0,0.85],[6,0.7],[12,0.95],[18,0.6],[24,0.75]
+          ]},
+          { cx: 155, cy: 98, w: 28, h: 7, trees: [[-8,0.5],[-3,0.6],[3,0.55],[8,0.5]]},
+          { cx: 215, cy: 116, w: 48, h: 10, trees: [
+            [-16,0.65],[-10,0.8],[-4,0.6],[3,0.75],[10,0.85],[16,0.6]
+          ]},
+          { cx: 288, cy: 108, w: 25, h: 7, trees: [[-6,0.5],[0,0.6],[6,0.55]]},
+          { cx: 18, cy: 120, w: 22, h: 5, trees: [[-5,0.45],[2,0.5],[7,0.4]]},
+        ];
+
+        function drawIslands() {
+          [1, 3, 0, 4, 2].forEach(i => {
+            const isl = islandData[i];
+            drawIslandShape(isl.cx, isl.cy, isl.w, isl.h);
+            isl.trees.forEach(([tx, ts]) => drawEvergreen(isl.cx + tx, isl.cy, ts));
+          });
+        }
+
+        // LIGHTHOUSE
+        function drawLighthouse() {
+          const lx = 93, ly = 104;
+          r(lx - 1, ly - 1, 4, 2, '#6a6a7a');
+          r(lx, ly - 7, 2, 6, '#e8e0d8');
+          r(lx, ly - 5, 2, 2, '#cc3333');
+          r(lx - 1, ly - 8, 4, 1, '#5a5a5a');
+          r(lx, ly - 10, 2, 2, '#3a3a3a');
+          r(lx, ly - 9, 2, 1, '#ffee55');
+          r(lx, ly - 11, 2, 1, '#cc3333');
+          r(lx, ly - 12, 1, 1, '#aa2222');
+          const beamAngle = (f * 0.06) % (Math.PI * 2);
+          const sweep = Math.cos(beamAngle);
+          if (Math.abs(sweep) > 0.2) {
+            const dir = sweep > 0 ? 1 : -1;
+            const bx = lx + 1, by = ly - 9;
+            const len = 25 * Math.abs(sweep);
+            X.save();
+            X.globalAlpha = 0.06 + Math.abs(sweep) * 0.05;
+            X.fillStyle = '#ffff88';
+            X.beginPath();
+            X.moveTo(bx, by);
+            X.lineTo(bx + dir * len, by - 6);
+            X.lineTo(bx + dir * len, by + 3);
+            X.closePath();
+            X.fill();
+            X.globalAlpha = 0.04 + Math.abs(sweep) * 0.03;
+            X.beginPath();
+            X.moveTo(bx, by);
+            X.lineTo(bx + dir * len * 0.6, by - 3);
+            X.lineTo(bx + dir * len * 0.6, by + 1);
+            X.closePath();
+            X.fill();
+            X.restore();
+          }
+          ra(lx - 1, ly - 10, 4, 2, '#ffee44', 0.25 + Math.sin(f * 0.25) * 0.12);
+        }
+
+        // FERRY
+        function drawFerry() {
+          const speed = 0.2;
+          const fx = Math.floor(((f * speed) % (W + 100)) - 50);
+          const bob = Math.sin(f * 0.12) * 0.7;
+          const fy = Math.floor(133 + bob);
+          for (let i = 1; i <= 6; i++) {
+            const wx = fx - i * 7, ww = 5 + i * 2;
+            const wa = Math.max(0, 0.25 - i * 0.04);
+            const wy = fy + 8 + Math.sin(f * 0.15 + i * 0.8) * 0.5;
+            ra(wx, wy, ww, 1, '#88c8e0', wa);
+            ra(wx + 1, wy + 1, ww - 2, 1, '#a0d8ee', wa * 0.6);
+          }
+          ra(fx + 42, fy + 5, 3, 1, '#a0d8ee', 0.5);
+          ra(fx + 43, fy + 6, 2, 1, '#80b8d8', 0.3);
+          r(fx + 2, fy + 5, 40, 4, '#006847');
+          r(fx + 4, fy + 4, 38, 1, '#006847');
+          r(fx + 40, fy + 3, 4, 4, '#006847');
+          r(fx + 42, fy + 4, 2, 2, '#008855');
+          r(fx + 4, fy + 5, 36, 1, '#008855');
+          r(fx + 2, fy + 8, 40, 1, '#004433');
+          r(fx + 2, fy + 4, 38, 1, '#00aa66');
+          r(fx + 6, fy + 1, 34, 4, '#e8e8e0');
+          r(fx + 8, fy, 30, 1, '#e8e8e0');
+          r(fx + 10, fy - 3, 26, 3, '#e8e8e0');
+          r(fx + 12, fy - 4, 22, 1, '#ddddd8');
+          for (let i = 0; i < 8; i++) r(fx + 12 + i * 3, fy - 2, 2, 2, '#70b0c8');
+          r(fx + 16, fy - 7, 14, 3, '#e8e8e0');
+          r(fx + 18, fy - 8, 10, 1, '#ddddd8');
+          r(fx + 18, fy - 6, 3, 2, '#60a0b8');
+          r(fx + 23, fy - 6, 3, 2, '#60a0b8');
+          r(fx + 29, fy - 10, 4, 3, '#006847');
+          r(fx + 29, fy - 11, 4, 1, '#333333');
+          r(fx + 30, fy - 12, 2, 1, '#444444');
+          const sp = f % 40;
+          if (sp < 25) {
+            ra(fx + 29 - sp * 0.3, fy - 12 - sp * 0.3, 3, 1, '#c8d8e0', Math.max(0, 0.2 - sp * 0.008));
+            if (sp > 6) ra(fx + 27 - sp * 0.4, fy - 14 - sp * 0.2, 4, 2, '#d0e0e8', Math.max(0, 0.12 - sp * 0.005));
+          }
+          r(fx + 6, fy + 3, 34, 1, '#006847');
+          ra(fx, fy + 9, 45, 1, '#3a6080', 0.5);
+        }
+
+        // BIRDS
+        const birds = [
+          { x: 70, y: 30, s: 0.35, ph: 0 },
+          { x: 140, y: 24, s: 0.3, ph: 1.8 },
+          { x: 190, y: 38, s: 0.4, ph: 3.2 },
+          { x: 50, y: 44, s: 0.28, ph: 0.9 },
+          { x: 260, y: 26, s: 0.33, ph: 2.5 },
+        ];
+
+        function drawBirds() {
+          birds.forEach(b => {
+            const bx = Math.floor(((b.x + f * b.s) % (W + 20)) - 10);
+            const by = Math.floor(b.y + Math.sin(f * 0.08 + b.ph) * 2);
+            const wing = Math.sin(f * 0.35 + b.ph);
+            X.fillStyle = '#1a1a33';
+            X.fillRect(bx, by, 1, 1);
+            X.fillRect(bx - 1, by + (wing > 0 ? -1 : 1), 1, 1);
+            X.fillRect(bx + 1, by + (wing > 0 ? -1 : 1), 1, 1);
+          });
+        }
+
+        // ATMOSPHERE & FOREGROUND
+        function drawAtmosphere() {
+          for (let i = 0; i < 5; i++) {
+            const mx = ((i * 73 + f * 0.15) % (W + 30)) - 15;
+            const my = 92 + Math.sin(i * 2.1 + f * 0.03) * 3;
+            ra(mx, my, 25, 2, '#90c0cc', 0.04);
+          }
+          for (let x = 0; x < 15; x++) {
+            ra(x, 0, 1, H, '#0a0a1a', (15 - x) * 0.015);
+            ra(W - 1 - x, 0, 1, H, '#0a0a1a', (15 - x) * 0.015);
+          }
+          for (let y = 0; y < 8; y++) {
+            ra(0, y, W, 1, '#0a0a1a', (8 - y) * 0.02);
+            ra(0, H - 1 - y, W, 1, '#0a0a1a', (8 - y) * 0.03);
+          }
+        }
+
+        function drawForeground() {
+          r(0, H - 12, W, 12, '#152a42');
+          r(0, H - 8, W, 8, '#0f2238');
+          for (let x = 0; x < W; x += 4) {
+            const wave = Math.sin(x * 0.15 + f * 0.1);
+            if (wave > 0.6) {
+              const wy = H - 14 + Math.floor(Math.sin(x * 0.08 + f * 0.06) * 3);
+              ra(x, wy, 3, 1, '#4a80a0', 0.25);
+            }
+          }
+        }
+
+        // RENDER LOOP
+        function render() {
+          X.clearRect(0, 0, W, H);
+          drawSky();
+          drawSun();
+          drawClouds();
+          drawMountains();
+          drawAtmosphere();
+          drawWater();
+          drawIslands();
+          drawLighthouse();
+          drawFerry();
+          drawBirds();
+          drawForeground();
+          f++;
+          setTimeout(() => requestAnimationFrame(render), 1000 / 10);
+        }
+
+        render();
+    </script>
+</body>
+</html>

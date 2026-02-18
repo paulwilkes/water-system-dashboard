@@ -110,6 +110,19 @@
     gap: 12px;
   }
 
+  .btn-signout {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--card);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
   .admin-badge {
     font-size: 12px;
     font-weight: 600;
@@ -737,7 +750,10 @@
     </nav>
   </div>
   <div class="top-bar-right">
-    <span class="admin-badge">Admin</span>
+    <span id="user-email" style="font-size: 13px; color: var(--text-muted);"></span>
+    <form method="POST" action="/auth/logout" style="margin: 0;">
+      <button type="submit" class="btn-signout">Sign out</button>
+    </form>
   </div>
 </div>
 
@@ -1269,6 +1285,16 @@
   // ─── Initialize ──────────────────────────────────────────
   loadStats();
   updateCharCount();
+
+  // Populate user email in header
+  fetch('/api/auth/me')
+    .then(r => r.json())
+    .then(data => {
+      if (data.authenticated && data.email) {
+        document.getElementById('user-email').textContent = data.email;
+      }
+    })
+    .catch(() => {});
 </script>
 
 </body>
