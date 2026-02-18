@@ -28,6 +28,7 @@ dotenv.config();
 initDatabase();
 
 const app = express();
+app.set('trust proxy', 1);  // Trust Fly.io reverse proxy (fixes https in OAuth callbacks)
 const PORT = process.env.PORT || 3000;
 
 // ── Body Parsing ──
