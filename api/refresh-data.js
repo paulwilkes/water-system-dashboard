@@ -56,7 +56,8 @@ async function refreshData() {
     production: {
       yearly: [],
       previousMonth: []
-    }
+    },
+    distributionLeak: []
   };
 
   // 1. Fetch Tank Data (YoLink REST API + MQTT readings)
@@ -236,8 +237,27 @@ async function refreshData() {
   }
   console.log('');
 
-  // 4. Save to JSON file
-  console.log('4. Saving data to public/data/current.json...');
+  // 4. Fetch Distribution Leak Data (Google Sheets - Service Meters tab)
+  console.log('4. Fetching distribution leak data from Google Sheets...');
+  try {
+    const credentials = loadGoogleCredentials();
+    const sheets = new GoogleSheetsClient(
+      credentials,
+      process.env.CHLORINE_SHEET_ID,
+      process.env.PRODUCTION_SHEET_ID
+    );
+
+    const distributionLeak = await sheets.getDistributionLeakData();
+    output.distributionLeak = distributionLeak;
+    console.log(`✓ Distribution leak: ${distributionLeak.length} quarterly records`);
+
+  } catch (error) {
+    console.error('⚠️  Failed to fetch distribution leak data:', error.message);
+  }
+  console.log('');
+
+  // 5. Save to JSON file
+  console.log('5. Saving data to public/data/current.json...');
   try {
     const outputDir = path.join(__dirname, '..', 'public', 'data');
     const outputFile = path.join(outputDir, 'current.json');

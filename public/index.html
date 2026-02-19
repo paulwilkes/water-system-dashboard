@@ -425,12 +425,61 @@
             margin: 20px 0;
         }
 
+        /* Distribution Leak Analysis */
+        .leak-current {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .leak-reading { flex: 1; }
+
+        .leak-value-display {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .leak-unit {
+            font-size: 20px;
+            color: var(--text-muted);
+            margin-left: 8px;
+        }
+
+        .leak-subtitle {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .two-chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
         @media (max-width: 900px) {
             .tank-grid {
                 grid-template-columns: 1fr;
             }
             .two-col-grid {
                 grid-template-columns: 1fr;
+            }
+            .two-chart-grid {
+                grid-template-columns: 1fr;
+            }
+            .leak-current {
+                flex-direction: column;
+                text-align: center;
             }
         }
 
@@ -532,6 +581,56 @@
 
                 <div class="stats-grid" id="stats-grid"></div>
             </div>
+
+            <!-- Distribution Leak Analysis -->
+            <div class="card" id="distribution-leak-card" style="display:none;">
+                <div class="card-title">Distribution Leak Analysis</div>
+                <div class="card-subtitle">Comparing Distribution Meter vs. House Meter Usage (Quarterly)</div>
+
+                <div class="leak-current" id="leak-current">
+                    <div class="leak-reading">
+                        <div class="leak-value-display">
+                            <span id="leak-value">--</span><span class="leak-unit">% loss</span>
+                        </div>
+                        <div class="leak-subtitle" id="leak-subtitle">Latest quarter</div>
+                    </div>
+                    <div class="chlorine-status">
+                        <div class="status-indicator good" id="leak-status-indicator">?</div>
+                        <div class="status-text" id="leak-status-text">Unknown</div>
+                    </div>
+                </div>
+
+                <div class="two-chart-grid">
+                    <div>
+                        <div class="card-subtitle" style="margin-bottom: 15px;">Usage Comparison (gal/day)</div>
+                        <div class="legend-custom">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: #6BBFBD;"></div>
+                                <div class="legend-label">Distribution Meter</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: #FF8B94;"></div>
+                                <div class="legend-label">House Meters Total</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: rgba(217, 83, 79, 0.5);"></div>
+                                <div class="legend-label">Unaccounted (Loss)</div>
+                            </div>
+                        </div>
+                        <div class="chart-container-tall">
+                            <canvas id="leakBarChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="card-subtitle" style="margin-bottom: 15px;">Loss % Trend</div>
+                        <div class="chart-container-tall">
+                            <canvas id="leakTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid" id="leak-stats-grid"></div>
+            </div>
         </div>
     </div>
 
@@ -564,6 +663,7 @@
                 renderChlorine(data.chlorine);
                 renderRecentMonths(data.production.recentMonths);
                 renderYearlyTrends(data.production.yearly);
+                renderDistributionLeak(data.distributionLeak);
                 
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
@@ -1044,6 +1144,258 @@
                     <div class="stat-card">
                         <div class="stat-label">${yearly.length}-Year Growth</div>
                         <div class="stat-value">+${growth}<span class="stat-unit">% usage</span></div>
+                    </div>
+                `;
+            }
+        }
+
+        // Render distribution leak analysis
+        function renderDistributionLeak(leakData) {
+            const card = document.getElementById('distribution-leak-card');
+            if (!leakData || leakData.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+
+            // Hero indicator — latest quarter's loss %
+            const latest = leakData[leakData.length - 1];
+            const lossVal = latest.lossPercent;
+
+            document.getElementById('leak-value').textContent =
+                lossVal !== null ? lossVal.toFixed(1) : '--';
+
+            let dateLabel = latest.date;
+            try {
+                const d = new Date(latest.date);
+                if (!isNaN(d)) {
+                    dateLabel = d.toLocaleDateString('en-US', {
+                        month: 'short', day: 'numeric', year: 'numeric'
+                    });
+                }
+            } catch (e) { /* keep raw string */ }
+            document.getElementById('leak-subtitle').textContent =
+                `Quarter ending ${dateLabel}`;
+
+            const indicator = document.getElementById('leak-status-indicator');
+            const statusText = document.getElementById('leak-status-text');
+
+            if (lossVal === null) {
+                indicator.className = 'status-indicator';
+                indicator.textContent = '?';
+                statusText.textContent = 'No Data';
+            } else if (lossVal < 10) {
+                indicator.className = 'status-indicator good';
+                indicator.textContent = '\u2713';
+                statusText.textContent = 'Acceptable';
+            } else if (lossVal < 20) {
+                indicator.className = 'status-indicator low';
+                indicator.textContent = '\u26A0';
+                statusText.textContent = 'Elevated';
+            } else {
+                indicator.className = 'status-indicator warning';
+                indicator.textContent = '\u26D4';
+                statusText.textContent = 'High Loss';
+            }
+
+            // Chart labels from dates
+            const labels = leakData.map(q => {
+                try {
+                    const d = new Date(q.date);
+                    if (!isNaN(d)) {
+                        return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                    }
+                    return q.date;
+                } catch (e) { return q.date; }
+            });
+
+            // Stacked bar chart: house meters + gap, with distribution as line overlay
+            const barCtx = document.getElementById('leakBarChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'House Meters (gal/day)',
+                            data: leakData.map(q => q.houseMeterGpd),
+                            backgroundColor: 'rgba(255, 139, 148, 0.8)',
+                            borderColor: '#FF8B94',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            stack: 'usage'
+                        },
+                        {
+                            label: 'Unaccounted Loss (gal/day)',
+                            data: leakData.map(q => q.gapGpd),
+                            backgroundColor: 'rgba(217, 83, 79, 0.35)',
+                            borderColor: '#d9534f',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            stack: 'usage'
+                        },
+                        {
+                            label: 'Distribution Meter (gal/day)',
+                            data: leakData.map(q => q.distributionGpd),
+                            type: 'line',
+                            backgroundColor: 'transparent',
+                            borderColor: '#6BBFBD',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#6BBFBD',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#2c2c2c',
+                            bodyColor: '#2c2c2c',
+                            borderColor: '#e8e4de',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed.y;
+                                    return context.dataset.label + ': ' +
+                                           (val !== null ? val.toLocaleString() : 'N/A');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stacked: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                            ticks: {
+                                color: '#8a8a8a',
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' gpd';
+                                }
+                            }
+                        },
+                        x: {
+                            stacked: true,
+                            grid: { display: false, drawBorder: false },
+                            ticks: { color: '#8a8a8a', font: { size: 10 } }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+
+            // Loss % trend line
+            const trendCtx = document.getElementById('leakTrendChart').getContext('2d');
+            const lossData = leakData.map(q => q.lossPercent);
+
+            const pointColors = lossData.map(v => {
+                if (v === null) return '#8a8a8a';
+                if (v < 10) return '#7ec8a4';
+                if (v < 20) return '#e8c97c';
+                return '#d9534f';
+            });
+
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Loss %',
+                        data: lossData,
+                        borderColor: '#e8927c',
+                        backgroundColor: 'rgba(232, 146, 124, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: pointColors,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#2c2c2c',
+                            bodyColor: '#2c2c2c',
+                            borderColor: '#e8e4de',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Water Loss: ' + context.parsed.y.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                            ticks: {
+                                color: '#8a8a8a',
+                                font: { size: 11 },
+                                callback: function(value) { return value + '%'; }
+                            }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: {
+                                color: '#8a8a8a',
+                                font: { size: 10 },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Stats grid
+            const validQuarters = leakData.filter(q =>
+                q.lossPercent !== null && q.distributionGpd !== null
+            );
+
+            if (validQuarters.length > 0) {
+                const avgLoss = validQuarters.reduce((s, q) => s + q.lossPercent, 0) / validQuarters.length;
+                const maxLoss = Math.max(...validQuarters.map(q => q.lossPercent));
+                const minLoss = Math.min(...validQuarters.map(q => q.lossPercent));
+                const latestGap = latest.gapGpd;
+
+                document.getElementById('leak-stats-grid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-label">Avg Loss Rate</div>
+                        <div class="stat-value">${avgLoss.toFixed(1)}<span class="stat-unit">%</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Best Quarter</div>
+                        <div class="stat-value">${minLoss.toFixed(1)}<span class="stat-unit">%</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Worst Quarter</div>
+                        <div class="stat-value">${maxLoss.toFixed(1)}<span class="stat-unit">%</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Current Gap</div>
+                        <div class="stat-value">${latestGap !== null ? latestGap.toLocaleString() : '--'}<span class="stat-unit">gal/day</span></div>
                     </div>
                 `;
             }
