@@ -91,7 +91,7 @@ async function refreshData() {
     output.tanks = [
       {
         id: 'tank1',
-        name: 'Tank 1 - Upper Reservoir',
+        name: 'Tank 1 - Source/Chlorination',
         status: 'no_sensor',
         message: 'Sensor not yet installed',
         level: null,
@@ -148,7 +148,7 @@ async function refreshData() {
       const TANK_CAPACITY_GAL = 2500;
       
       output.tanks = [
-        { id: 'tank1', name: 'Tank 1 - Upper Reservoir', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
+        { id: 'tank1', name: 'Tank 1 - Source/Chlorination', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
         ...Object.values(mqttReadings).map(reading => {
           // Calculate percentage and gallons
           let percentage = null;
@@ -179,9 +179,9 @@ async function refreshData() {
     } else {
       // No MQTT readings, use placeholder data
       output.tanks = [
-        { id: 'tank1', name: 'Tank 1 - Upper Reservoir', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
-        { id: 'tank2', name: 'Tank 2 - Storage & Distribution', status: 'offline', level: null, percentage: null, capacity: 2500 },
-        { id: 'tank3', name: 'Tank 3 - Storage & Distribution', status: 'offline', level: null, percentage: null, capacity: 2500 }
+        { id: 'tank1', name: 'Tank 1 - Source/Chlorination', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
+        { id: 'tank2', name: 'Tank 2 - Distribution', status: 'offline', level: null, percentage: null, capacity: 2500 },
+        { id: 'tank3', name: 'Tank 3 - Distribution', status: 'offline', level: null, percentage: null, capacity: 2500 }
       ];
     }
   }

@@ -425,7 +425,7 @@
             margin: 20px 0;
         }
 
-        /* Distribution Leak Analysis */
+        /* Distribution vs Consumption Analysis */
         .leak-current {
             background: var(--bg);
             border-radius: var(--radius);
@@ -500,6 +500,7 @@
             </a>
             <nav class="nav-tabs">
                 <a class="nav-tab active" href="/">Dashboard</a>
+                <a class="nav-tab" href="/sensor-health.html">Sensor Health</a>
                 <a class="nav-tab" href="/alerts.html">Alerts</a>
             </nav>
         </div>
@@ -582,9 +583,9 @@
                 <div class="stats-grid" id="stats-grid"></div>
             </div>
 
-            <!-- Distribution Leak Analysis -->
+            <!-- Distribution vs Consumption Analysis -->
             <div class="card" id="distribution-leak-card" style="display:none;">
-                <div class="card-title">Distribution Leak Analysis</div>
+                <div class="card-title">Distribution vs Consumption Analysis</div>
                 <div class="card-subtitle">Comparing Distribution Meter vs. House Meter Usage (Quarterly)</div>
 
                 <div class="leak-current" id="leak-current">

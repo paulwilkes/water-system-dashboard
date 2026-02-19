@@ -16,6 +16,7 @@ import { configurePassport } from './lib/passport.js';
 import { requireAuth, redirectIfAuthenticated } from './lib/auth.js';
 import alertRoutes from './api/routes/alerts.js';
 import subscriberRoutes from './api/routes/subscribers.js';
+import sensorRoutes from './api/routes/sensors.js';
 import refreshData from './api/refresh-data.js';
 import { startMQTT } from './lib/yolink-mqtt.js';
 
@@ -128,12 +129,17 @@ app.get('/alerts.html', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'alerts.html'));
 });
 
+app.get('/sensor-health.html', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'sensor-health.html'));
+});
+
 // ── Static files (CSS, JS, images, opt-in, privacy, terms, data) ──
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Protected API routes ──
 app.use('/api/alerts', requireAuth, alertRoutes);
 app.use('/api/subscribers', subscriberRoutes);  // mixed auth handled inside router
+app.use('/api/sensors', requireAuth, sensorRoutes);
 
 app.get('/api/refresh', requireAuth, async (req, res) => {
   try {
