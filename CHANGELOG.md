@@ -4,6 +4,63 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.5.0] — 2026-02-18 — Google OAuth & Distribution Leak Analysis
+
+Added Google OAuth authentication with an email allowlist to secure the dashboard, and a new distribution leak analysis chart to help identify water loss in the system.
+
+### Added
+- **Google OAuth login** (`lib/passport.js`) — email-based allowlist stored in SQLite `allowed_users` table
+- **Login page** (`public/login.html`) — branded sign-in page with pixel art background
+- **Session management** — SQLite-backed sessions with 7-day duration and secure cookies
+- **Distribution leak analysis chart** on dashboard — compares distribution meter vs house meter usage quarterly
+  - Bar chart (usage comparison) and trend line (loss % over time)
+  - Filtered to Oct 2024 onward for relevant data
+  - Status indicator and detailed stats grid
+
+### Changed
+- All dashboard and alert pages now require authentication
+- Send alert buttons temporarily disabled pending Twilio campaign approval
+
+### Fixed
+- OAuth redirect URI using `http` instead of `https` behind Fly.io reverse proxy (trust proxy setting)
+
+---
+
+## [0.4.0] — 2026-02-15 — Twilio Compliance & Legal Pages
+
+Added privacy policy and terms pages required for Twilio toll-free number verification.
+
+### Added
+- **Privacy Policy page** (`public/privacy.html`) — data collection and usage disclosures
+- **SMS Terms & Conditions page** (`public/terms.html`) — message rates, carrier charges, opt-out instructions
+- Links from opt-in page to both legal documents
+
+---
+
+## [0.3.0] — 2026-02-13 — Public Opt-In, Branding & Infrastructure
+
+Added a public SMS opt-in page for Twilio toll-free verification, unified the branding across all pages, and hardened the Fly.io deployment for production reliability.
+
+### Added
+- **Public SMS opt-in page** (`public/opt-in.html`) — subscriber signup form for Twilio verification
+- **Subdomain routing** — `optin.beulahparkws.org` serves the opt-in page, privacy policy, and terms only
+- **"Boil Notice Lifted" alert type** — all-clear message option for the alert system
+- **BPWS favicon** on all pages
+- **BPWS leaf logo** in all page headers (replaced water droplet emoji)
+- **Offline/online sensor tracking** in MQTT listener — logs sensor status changes to `sensor-events.json`
+
+### Changed
+- Unified dashboard and alerts page design — shared header, navigation tabs, fonts (DM Sans), and color palette
+- Tank 1 (Upper Reservoir) capacity corrected to 1,500 gal
+- Removed zone selector from opt-in page and alerts page (only 40 connections, zones unnecessary)
+- Removed redundant test button from alerts page
+
+### Fixed
+- **MQTT token refresh** — disconnect and reconnect to re-authenticate (fixes stale token issue)
+- **Fly.io VM memory** bumped to 512MB to prevent OOM crashes
+
+---
+
 ## [0.2.0] — 2026-02-12 — SMS Alert System
 
 Added a full SMS alert system with Twilio integration, SQLite database, and an admin UI for sending emergency notifications to subscribers.
