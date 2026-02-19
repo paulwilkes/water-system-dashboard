@@ -1159,6 +1159,13 @@
 
             card.style.display = 'block';
 
+            // Filter to Oct 2024 onward (earlier quarters have incomplete/negative data)
+            const cutoff = new Date('2024-10-01');
+            leakData = leakData.filter(q => {
+                try { return new Date(q.date) >= cutoff; } catch (e) { return false; }
+            });
+            if (leakData.length === 0) { card.style.display = 'none'; return; }
+
             // Hero indicator — latest quarter's loss %
             const latest = leakData[leakData.length - 1];
             const lossVal = latest.lossPercent;
