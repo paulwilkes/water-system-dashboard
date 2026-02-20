@@ -83,9 +83,12 @@ async function refreshData() {
 
     const tanks = await yolink.getTankLevels();
 
-    // Tank specifications: 39cm height = 2,500 gallons capacity
-    const TANK_HEIGHT_CM = 39;
-    const TANK_CAPACITY_GAL = 2500;
+    // Per-tank calibration: height at 100% full and capacity in gallons
+    const TANK_CALIBRATION = {
+      'd88b4c010009063b': { heightCm: 32.63, capacityGal: 2500 }, // Tank 2
+      'd88b4c01000bf5ee': { heightCm: 34.53, capacityGal: 2500 }  // Tank 3
+    };
+    const DEFAULT_CALIBRATION = { heightCm: 39, capacityGal: 2500 };
 
     // Transform to dashboard format, merging MQTT readings where available
     output.tanks = [
@@ -101,18 +104,21 @@ async function refreshData() {
       ...tanks.map(tank => {
         // Check if we have MQTT readings for this device
         const mqttData = mqttReadings[tank.id];
-        
+
         // Get the depth from MQTT or REST API
         const depth = mqttData?.level ?? tank.depth ?? null;
-        
+
+        // Use per-tank calibration or fall back to default
+        const cal = TANK_CALIBRATION[tank.id] || DEFAULT_CALIBRATION;
+
         // Calculate percentage and gallons based on depth
         let percentage = null;
         let gallons = null;
-        
+
         if (depth !== null && depth !== undefined) {
-          percentage = Math.round((depth / TANK_HEIGHT_CM) * 100);
-          gallons = Math.round((depth / TANK_HEIGHT_CM) * TANK_CAPACITY_GAL);
-          
+          percentage = Math.round((depth / cal.heightCm) * 100);
+          gallons = Math.round((depth / cal.heightCm) * cal.capacityGal);
+
           // Ensure percentage doesn't exceed 100%
           if (percentage > 100) percentage = 100;
         }
@@ -129,7 +135,7 @@ async function refreshData() {
           lastUpdate: mqttData?.timestamp ?? tank.lastUpdate,
           temperature: mqttData?.temperature ?? null,
           gallons: gallons,
-          capacity: TANK_CAPACITY_GAL,
+          capacity: cal.capacityGal,
           dataSource: mqttData ? 'mqtt' : 'rest'
         };
       })
@@ -143,20 +149,24 @@ async function refreshData() {
     if (Object.keys(mqttReadings).length > 0) {
       console.log('  Using MQTT readings as fallback...');
       
-      // Tank specifications
-      const TANK_HEIGHT_CM = 39;
-      const TANK_CAPACITY_GAL = 2500;
-      
+      // Per-tank calibration (same as above)
+      const TANK_CAL = {
+        'd88b4c010009063b': { heightCm: 32.63, capacityGal: 2500 }, // Tank 2
+        'd88b4c01000bf5ee': { heightCm: 34.53, capacityGal: 2500 }  // Tank 3
+      };
+      const DEFAULT_CAL = { heightCm: 39, capacityGal: 2500 };
+
       output.tanks = [
         { id: 'tank1', name: 'Tank 1 - Source/Chlorination', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
         ...Object.values(mqttReadings).map(reading => {
+          const cal = TANK_CAL[reading.deviceId] || DEFAULT_CAL;
           // Calculate percentage and gallons
           let percentage = null;
           let gallons = null;
-          
+
           if (reading.level !== null && reading.level !== undefined) {
-            percentage = Math.round((reading.level / TANK_HEIGHT_CM) * 100);
-            gallons = Math.round((reading.level / TANK_HEIGHT_CM) * TANK_CAPACITY_GAL);
+            percentage = Math.round((reading.level / cal.heightCm) * 100);
+            gallons = Math.round((reading.level / cal.heightCm) * cal.capacityGal);
             if (percentage > 100) percentage = 100;
           }
           
@@ -171,7 +181,7 @@ async function refreshData() {
             lastUpdate: reading.timestamp,
             temperature: reading.temperature,
             gallons: gallons,
-            capacity: TANK_CAPACITY_GAL,
+            capacity: cal.capacityGal,
             dataSource: 'mqtt'
           };
         })

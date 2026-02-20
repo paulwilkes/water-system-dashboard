@@ -4,6 +4,17 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.5.1] — 2026-02-20 — Tank Meter Calibration
+
+Updated tank level calibration from a shared height constant to per-tank values so the dashboard percentages match actual fill levels.
+
+### Changed
+- **Per-tank calibration** in `api/refresh-data.js` — Tank 2 height calibrated to 32.63 cm, Tank 3 to 34.53 cm (previously both used 39 cm)
+- Both tanks now read 95% at current sensor depths (was 79% and 84%)
+- Calibration applies to both the main data path and the MQTT fallback path
+
+---
+
 ## [0.5.0] — 2026-02-18 — Google OAuth & Distribution Leak Analysis
 
 Added Google OAuth authentication with an email allowlist to secure the dashboard, and a new distribution leak analysis chart to help identify water loss in the system.
