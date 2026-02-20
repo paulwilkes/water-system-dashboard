@@ -104,6 +104,66 @@
     background: var(--coral-light);
   }
 
+  /* ── Hamburger Menu (mobile) ── */
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    color: var(--text);
+  }
+  .hamburger svg { display: block; }
+
+  .mobile-nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 200;
+  }
+  .mobile-nav-overlay.open { display: block; }
+
+  .mobile-nav {
+    position: fixed;
+    top: 0; right: 0;
+    width: 260px;
+    height: 100%;
+    background: var(--card);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+  }
+  .mobile-nav.open { transform: translateX(0); }
+
+  .mobile-nav-close {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 20px;
+    color: var(--text-muted);
+  }
+
+  .mobile-nav a {
+    display: block;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .mobile-nav a:hover { background: var(--bg); }
+  .mobile-nav a.active {
+    color: var(--text);
+    background: var(--coral-light);
+  }
+
   .top-bar-right {
     display: flex;
     align-items: center;
@@ -732,6 +792,8 @@
     .top-bar { padding: 0 16px; }
     .main { padding: 20px 16px; }
     .nav-tabs { display: none; }
+    .hamburger { display: block; }
+    .top-bar-right { display: none; }
   }
 </style>
 </head>
@@ -756,7 +818,19 @@
       <button type="submit" class="btn-signout">Sign out</button>
     </form>
   </div>
+  <button class="hamburger" onclick="document.getElementById('mobile-nav').classList.add('open');document.getElementById('mobile-overlay').classList.add('open');" aria-label="Menu">
+    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
 </div>
+
+<!-- Mobile Nav Drawer -->
+<div class="mobile-nav-overlay" id="mobile-overlay" onclick="this.classList.remove('open');document.getElementById('mobile-nav').classList.remove('open');"></div>
+<nav class="mobile-nav" id="mobile-nav">
+  <button class="mobile-nav-close" onclick="this.parentElement.classList.remove('open');document.getElementById('mobile-overlay').classList.remove('open');" aria-label="Close menu">&#x2715;</button>
+  <a href="/">Dashboard</a>
+  <a href="/sensor-health.html">Sensor Health</a>
+  <a class="active" href="/alerts.html">Alerts</a>
+</nav>
 
 <!-- ── Main Content ── -->
 <div class="main">

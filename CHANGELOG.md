@@ -4,6 +4,16 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.5.2] — 2026-02-20 — Mobile Hamburger Menu & Sensor Temp Fix
+
+### Added
+- **Hamburger menu** on mobile (index.html, sensor-health.html, alerts.html) — slide-out nav drawer replaces hidden nav tabs at 600px breakpoint
+
+### Changed
+- **Temperature display** on Sensor Health page now shows Fahrenheit instead of Celsius
+
+---
+
 ## [0.5.1] — 2026-02-20 — Tank Meter Calibration
 
 Updated tank level calibration from a shared height constant to per-tank values so the dashboard percentages match actual fill levels.
