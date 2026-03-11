@@ -19,6 +19,19 @@ import TwilioService from '../../lib/twilio.js';
 
 const router = Router();
 
+/**
+ * Get a configured TwilioService instance
+ */
+function getTwilioService() {
+  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env;
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
+    return null;
+  }
+  return new TwilioService(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER);
+}
+
+const OPT_IN_CONFIRMATION = 'BEULAH PARK WATER SYSTEM: You\'re now subscribed to water service alerts. You\'ll be notified of outages, repairs, and boil water notices. Reply STOP to unsubscribe, HELP for info. Msg & data rates may apply.';
+
 // POST / (opt-in signup) is public; all other routes require auth
 router.use((req, res, next) => {
   if (req.method === 'POST' && req.path === '/') return next();
@@ -96,6 +109,18 @@ router.post('/', (req, res) => {
     }
 
     const result = createSubscriber({ name, phone, zone, status });
+
+    // Send opt-in confirmation SMS (non-blocking)
+    const twilio = getTwilioService();
+    if (twilio) {
+      twilio.sendSMS(result.phone, OPT_IN_CONFIRMATION)
+        .then(smsResult => {
+          if (smsResult.error) console.error('Opt-in confirmation SMS failed:', smsResult.error);
+          else console.log('Opt-in confirmation SMS sent to', result.phone);
+        })
+        .catch(err => console.error('Opt-in confirmation SMS error:', err.message));
+    }
+
     res.status(201).json({ id: result.id, phone: result.phone, message: 'Subscriber added' });
   } catch (error) {
     if (error.message.includes('UNIQUE constraint')) {
