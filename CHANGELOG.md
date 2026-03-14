@@ -4,6 +4,19 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.5.3] — 2026-03-14 — Twilio Compliance Fixes for Campaign Approval
+
+Addressed specific feedback from Twilio reviewer to unblock toll-free campaign approval.
+
+### Changed
+- **Consent checkbox is now optional** — form submits without checking the box; unchecked subscribers are saved with `status: 'pending'` instead of `active` (Fix 1 — primary rejection blocker)
+- **Brand name corrected** in header to full legal name "Beulah Park Water System" (was "Beulah Park Water") (Fix 2)
+- **HELP keyword added** to consent language — now reads "Reply STOP to unsubscribe or HELP for assistance at any time" (Fix 3)
+- **Confirmation SMS gated on consent** — backend only sends opt-in confirmation SMS when status is `active`
+- **Success message adapts** — users who skip the checkbox see "You're Registered!" with a note that SMS alerts require opt-in
+
+---
+
 ## [0.5.2] — 2026-02-20 — Mobile Hamburger Menu & Sensor Temp Fix
 
 ### Added
