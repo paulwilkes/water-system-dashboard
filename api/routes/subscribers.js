@@ -110,9 +110,9 @@ router.post('/', (req, res) => {
 
     const result = createSubscriber({ name, phone, zone, status });
 
-    // Send opt-in confirmation SMS (non-blocking)
+    // Send opt-in confirmation SMS only if subscriber consented (non-blocking)
     const twilio = getTwilioService();
-    if (twilio) {
+    if (twilio && status === 'active') {
       twilio.sendSMS(result.phone, OPT_IN_CONFIRMATION)
         .then(smsResult => {
           if (smsResult.error) console.error('Opt-in confirmation SMS failed:', smsResult.error);

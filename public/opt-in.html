@@ -229,6 +229,20 @@
     display: block;
   }
 
+  .form-info {
+    display: none;
+    background: var(--blue-light);
+    color: var(--blue);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .form-info.visible {
+    display: block;
+  }
+
   /* ── Success State ── */
   .success-card {
     display: none;
@@ -322,7 +336,7 @@
 <div class="header">
   <a class="logo-link" href="/">
     <img class="logo-icon" src="/images/bpws-logo.png" alt="BPWS">
-    <span class="system-name">Beulah Park Water</span>
+    <span class="system-name">Beulah Park Water System</span>
   </a>
 </div>
 
@@ -355,8 +369,8 @@
 
       <div class="consent-group">
         <label class="consent-label">
-          <input type="checkbox" id="consent" name="consent" required>
-          <span>I agree to receive automated SMS alerts from Beulah Park Water System regarding water service disruptions, repairs, and boil water notices. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe at any time. I have read and agree to the <a href="/terms.html" target="_blank">SMS Terms &amp; Conditions</a> and <a href="/privacy.html" target="_blank">Privacy Policy</a>.</span>
+          <input type="checkbox" id="consent" name="consent">
+          <span>I agree to receive automated SMS alerts from Beulah Park Water System regarding water service disruptions, repairs, and boil water notices. Message frequency varies. Message and data rates may apply. Reply STOP to unsubscribe or HELP for assistance at any time. I have read and agree to the <a href="/terms.html" target="_blank">SMS Terms &amp; Conditions</a> and <a href="/privacy.html" target="_blank">Privacy Policy</a>.</span>
         </label>
       </div>
 
@@ -367,8 +381,8 @@
   <!-- Success State (hidden until form submits) -->
   <div class="success-card" id="successCard">
     <div class="success-icon">✅</div>
-    <h2>You're Signed Up!</h2>
-    <p>You'll receive a text message when there are water system issues. Reply STOP at any time to unsubscribe.</p>
+    <h2 id="successHeading">You're Signed Up!</h2>
+    <p id="successMessage">You'll receive a text message when there are water system issues. Reply STOP at any time to unsubscribe.</p>
   </div>
 
   <!-- Disclosure -->
@@ -463,11 +477,6 @@
       return;
     }
 
-    if (!consent) {
-      showError('You must agree to receive alerts to sign up.');
-      return;
-    }
-
     // Disable button while submitting
     submitBtn.disabled = true;
     submitBtn.textContent = 'Signing up...';
@@ -479,7 +488,7 @@
         body: JSON.stringify({
           name,
           phone,
-          status: 'active'
+          status: consent ? 'active' : 'pending'
         })
       });
 
@@ -498,6 +507,10 @@
 
       // Success — swap form for confirmation
       formCard.style.display = 'none';
+      if (!consent) {
+        document.getElementById('successHeading').textContent = 'You\'re Registered!';
+        document.getElementById('successMessage').textContent = 'Your information has been saved, but you won\'t receive SMS alerts until you opt in. You can update your preferences anytime by contacting us.';
+      }
       successCard.classList.add('visible');
 
     } catch (err) {
