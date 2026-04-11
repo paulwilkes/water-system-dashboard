@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsubscribe — Beulah Park Water System</title>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1eb;
+    --card: #ffffff;
+    --coral: #e8927c;
+    --mint: #7ec8a4;
+    --red: #d9534f;
+    --text: #2c2c2c;
+    --text-muted: #8a8a8a;
+    --border: #e8e4de;
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 480px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+  }
+  .coral-bar {
+    height: 6px;
+    background: var(--coral);
+    border-radius: 3px;
+    margin: -40px -40px 28px;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .logo { width: 56px; height: 56px; margin-bottom: 20px; }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+    margin-bottom: 16px;
+  }
+  .email {
+    display: inline-block;
+    background: var(--bg);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 4px 0;
+  }
+  .status-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  .spinner {
+    border: 3px solid var(--border);
+    border-top-color: var(--coral);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { color: var(--red); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="coral-bar"></div>
+  <img class="logo" src="/images/bpws-logo.png" alt="BPWS">
+  <div id="content">
+    <div class="spinner"></div>
+    <h1>Processing…</h1>
+    <p>Please wait while we unsubscribe you.</p>
+  </div>
+</div>
+
+<script>
+  const token = new URLSearchParams(window.location.search).get('token');
+  const content = document.getElementById('content');
+
+  function render(html) { content.innerHTML = html; }
+
+  if (!token) {
+    render(`
+      <div class="status-icon">⚠️</div>
+      <h1>Missing link</h1>
+      <p>This unsubscribe link is invalid. Please use the link from the email you received.</p>
+    `);
+  } else {
+    fetch('/api/emails/unsubscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) {
+        render(`
+          <div class="status-icon">⚠️</div>
+          <h1>Unable to unsubscribe</h1>
+          <p class="error">${data.error || 'An error occurred.'}</p>
+          <p>Please contact us at <a href="https://beulahparkws.org/contact">beulahparkws.org/contact</a>.</p>
+        `);
+        return;
+      }
+      if (data.alreadyUnsubscribed) {
+        render(`
+          <div class="status-icon">✓</div>
+          <h1>Already unsubscribed</h1>
+          <p><span class="email">${data.email}</span> was already removed from our notice list.</p>
+        `);
+      } else {
+        render(`
+          <div class="status-icon">✓</div>
+          <h1>You've been unsubscribed</h1>
+          <p><span class="email">${data.email}</span> has been removed from our email notice list. You will no longer receive broadcasts from Beulah Park Water System.</p>
+          <p>If this was a mistake, please contact us at <a href="https://beulahparkws.org/contact">beulahparkws.org/contact</a>.</p>
+        `);
+      }
+    })
+    .catch(err => {
+      render(`
+        <div class="status-icon">⚠️</div>
+        <h1>Something went wrong</h1>
+        <p class="error">${err.message}</p>
+      `);
+    });
+  }
+</script>
+</body>
+</html>

@@ -17,6 +17,7 @@ import { requireAuth, redirectIfAuthenticated } from './lib/auth.js';
 import alertRoutes from './api/routes/alerts.js';
 import subscriberRoutes from './api/routes/subscribers.js';
 import sensorRoutes from './api/routes/sensors.js';
+import emailRoutes, { handleUnsubscribe } from './api/routes/emails.js';
 import refreshData from './api/refresh-data.js';
 import { startMQTT } from './lib/yolink-mqtt.js';
 
@@ -133,6 +134,22 @@ app.get('/sensor-health.html', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'sensor-health.html'));
 });
 
+app.get('/emails', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'emails.html'));
+});
+
+app.get('/emails.html', requireAuth, (req, res) => {
+  res.redirect('/emails');
+});
+
+// Public unsubscribe page (no auth) — must be before static so our handler runs
+app.get('/unsubscribe', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'unsubscribe.html'));
+});
+
+// Public unsubscribe API (no auth) — must be registered BEFORE the protected /api/emails mount
+app.post('/api/emails/unsubscribe', handleUnsubscribe);
+
 // ── Static files (CSS, JS, images, opt-in, privacy, terms, data) ──
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -140,6 +157,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/alerts', requireAuth, alertRoutes);
 app.use('/api/subscribers', subscriberRoutes);  // mixed auth handled inside router
 app.use('/api/sensors', requireAuth, sensorRoutes);
+app.use('/api/emails', requireAuth, emailRoutes);
 
 app.get('/api/refresh', requireAuth, async (req, res) => {
   try {

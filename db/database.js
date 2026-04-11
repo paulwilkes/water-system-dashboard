@@ -89,6 +89,49 @@ export function initDatabase() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_allowed_users_email ON allowed_users(email);
+
+    CREATE TABLE IF NOT EXISTS group_members (
+      email       TEXT PRIMARY KEY COLLATE NOCASE,
+      role        TEXT NOT NULL DEFAULT 'MEMBER',
+      google_id   TEXT,
+      added_at    TEXT DEFAULT (datetime('now')),
+      synced_at   TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS email_sends (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      sent_at         TEXT DEFAULT (datetime('now')),
+      sent_by         TEXT NOT NULL,
+      subject         TEXT NOT NULL,
+      body_html       TEXT NOT NULL,
+      recipient_count INTEGER NOT NULL DEFAULT 0,
+      delivered_count INTEGER DEFAULT 0,
+      failed_count    INTEGER DEFAULT 0,
+      status          TEXT DEFAULT 'sending'
+                        CHECK(status IN ('sending','completed','failed'))
+    );
+
+    CREATE TABLE IF NOT EXISTS email_send_log (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      send_id         INTEGER NOT NULL REFERENCES email_sends(id),
+      email           TEXT NOT NULL,
+      resend_id       TEXT,
+      status          TEXT,
+      error_message   TEXT,
+      created_at      TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_email_send_log_send_id ON email_send_log(send_id);
+
+    CREATE TABLE IF NOT EXISTS unsubscribe_tokens (
+      token       TEXT PRIMARY KEY,
+      email       TEXT NOT NULL,
+      send_id     INTEGER REFERENCES email_sends(id),
+      created_at  TEXT DEFAULT (datetime('now')),
+      used_at     TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_unsubscribe_tokens_email ON unsubscribe_tokens(email);
   `);
 
   runMigrations();
@@ -401,6 +444,140 @@ export function addAllowedUser({ email, name, added_by }) {
 
 export function removeAllowedUser(email) {
   return db.prepare('DELETE FROM allowed_users WHERE email = ?').run(email.toLowerCase());
+}
+
+// ─── Email Group Member Queries ─────────────────────────────
+
+/**
+ * Get all cached Google Group members
+ */
+export function getGroupMembers() {
+  return db.prepare('SELECT * FROM group_members ORDER BY email ASC').all();
+}
+
+/**
+ * Replace the group_members cache with a fresh list from Google.
+ * Runs in a transaction: deletes existing rows, inserts fresh ones.
+ */
+export function replaceGroupMembers(members) {
+  const now = new Date().toISOString();
+  const del = db.prepare('DELETE FROM group_members');
+  const ins = db.prepare(`
+    INSERT INTO group_members (email, role, google_id, added_at, synced_at)
+    VALUES (@email, @role, @google_id, @added_at, @synced_at)
+  `);
+  const tx = db.transaction((rows) => {
+    del.run();
+    for (const m of rows) {
+      ins.run({
+        email: m.email,
+        role: m.role || 'MEMBER',
+        google_id: m.id || null,
+        added_at: now,
+        synced_at: now
+      });
+    }
+  });
+  tx(members);
+}
+
+/**
+ * Upsert a single member into the cache (after add via Google API succeeds)
+ */
+export function upsertGroupMember({ email, role, google_id }) {
+  return db.prepare(`
+    INSERT INTO group_members (email, role, google_id, synced_at)
+    VALUES (@email, @role, @google_id, datetime('now'))
+    ON CONFLICT(email) DO UPDATE SET
+      role = excluded.role,
+      google_id = excluded.google_id,
+      synced_at = excluded.synced_at
+  `).run({
+    email: email.toLowerCase(),
+    role: role || 'MEMBER',
+    google_id: google_id || null
+  });
+}
+
+/**
+ * Remove a member from the cache (after removal via Google API succeeds)
+ */
+export function deleteGroupMember(email) {
+  return db.prepare('DELETE FROM group_members WHERE email = ?').run(email.toLowerCase());
+}
+
+/**
+ * Most recent synced_at across cached members
+ */
+export function getLastMemberSyncAt() {
+  const row = db.prepare('SELECT MAX(synced_at) as synced_at FROM group_members').get();
+  return row?.synced_at || null;
+}
+
+// ─── Email Send Queries ─────────────────────────────────────
+
+export function createEmailSend({ sent_by, subject, body_html, recipient_count }) {
+  const result = db.prepare(`
+    INSERT INTO email_sends (sent_by, subject, body_html, recipient_count)
+    VALUES (@sent_by, @subject, @body_html, @recipient_count)
+  `).run({ sent_by, subject, body_html, recipient_count });
+  return { id: result.lastInsertRowid };
+}
+
+export function updateEmailSendCounts(id, { delivered_count, failed_count, status }) {
+  return db.prepare(`
+    UPDATE email_sends
+    SET delivered_count = @delivered_count,
+        failed_count = @failed_count,
+        status = @status
+    WHERE id = @id
+  `).run({ id, delivered_count, failed_count, status });
+}
+
+export function logEmailDelivery({ send_id, email, resend_id, status, error_message }) {
+  return db.prepare(`
+    INSERT INTO email_send_log (send_id, email, resend_id, status, error_message)
+    VALUES (@send_id, @email, @resend_id, @status, @error_message)
+  `).run({
+    send_id,
+    email,
+    resend_id: resend_id || null,
+    status,
+    error_message: error_message || null
+  });
+}
+
+export function getEmailSendHistory(limit = 20, offset = 0) {
+  return db.prepare(`
+    SELECT id, sent_at, sent_by, subject, recipient_count,
+           delivered_count, failed_count, status
+    FROM email_sends
+    ORDER BY sent_at DESC
+    LIMIT ? OFFSET ?
+  `).all(limit, offset);
+}
+
+export function getEmailSendById(id) {
+  return db.prepare('SELECT * FROM email_sends WHERE id = ?').get(id);
+}
+
+// ─── Unsubscribe Token Queries ──────────────────────────────
+
+export function createUnsubscribeToken({ token, email, send_id }) {
+  return db.prepare(`
+    INSERT INTO unsubscribe_tokens (token, email, send_id)
+    VALUES (@token, @email, @send_id)
+  `).run({ token, email: email.toLowerCase(), send_id: send_id || null });
+}
+
+export function getUnsubscribeToken(token) {
+  return db.prepare('SELECT * FROM unsubscribe_tokens WHERE token = ?').get(token);
+}
+
+export function markUnsubscribeTokenUsed(token) {
+  return db.prepare(`
+    UPDATE unsubscribe_tokens SET used_at = datetime('now') WHERE token = ?
+  `).run(token);
 }
 
 // ─── Utilities ──────────────────────────────────────────────
