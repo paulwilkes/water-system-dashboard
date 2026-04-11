@@ -91,8 +91,78 @@ export function initDatabase() {
     CREATE INDEX IF NOT EXISTS idx_allowed_users_email ON allowed_users(email);
   `);
 
+  runMigrations();
+
   console.log('Database initialized at', DB_PATH);
   return db;
+}
+
+/**
+ * Apply in-place migrations for tables whose CHECK constraints have drifted
+ * from the schema above. SQLite has no `ALTER TABLE DROP CONSTRAINT`, so we
+ * detect drift by inspecting the stored CREATE statement in sqlite_master
+ * and rebuild the table when a required token is missing.
+ *
+ * Each migration is idempotent — if the table already matches, it's a no-op.
+ */
+function runMigrations() {
+  // Migration 1: alerts.type CHECK must include 'boil_lifted'
+  // (Tables created before boil_lifted was added have the old constraint.)
+  migrateTableIfMissing({
+    table: 'alerts',
+    requiredToken: "'boil_lifted'",
+    rebuild: () => {
+      db.exec(`
+        CREATE TABLE alerts_new (
+          id              INTEGER PRIMARY KEY AUTOINCREMENT,
+          type            TEXT NOT NULL CHECK(type IN ('repair','outage','boil','boil_lifted')),
+          message         TEXT NOT NULL,
+          zone            TEXT DEFAULT 'all',
+          recipient_count INTEGER DEFAULT 0,
+          delivered_count INTEGER DEFAULT 0,
+          failed_count    INTEGER DEFAULT 0,
+          cost_estimate   REAL DEFAULT 0,
+          sent_by         TEXT DEFAULT 'admin',
+          status          TEXT DEFAULT 'sending'
+                            CHECK(status IN ('sending','completed','failed')),
+          created_at      TEXT DEFAULT (datetime('now'))
+        );
+        INSERT INTO alerts_new
+          SELECT id, type, message, zone, recipient_count, delivered_count,
+                 failed_count, cost_estimate, sent_by, status, created_at
+          FROM alerts;
+        DROP TABLE alerts;
+        ALTER TABLE alerts_new RENAME TO alerts;
+      `);
+    }
+  });
+}
+
+/**
+ * Rebuild a table if its stored CREATE statement is missing `requiredToken`.
+ * The rebuild callback must create a `<table>_new` table, copy rows from the
+ * old table, drop the old table, and rename the new one into place.
+ * Runs inside a transaction with foreign_keys temporarily disabled so
+ * referencing tables (e.g. alert_log -> alerts) aren't cascaded.
+ */
+function migrateTableIfMissing({ table, requiredToken, rebuild }) {
+  const row = db.prepare(
+    "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?"
+  ).get(table);
+
+  if (!row || !row.sql) return;
+  if (row.sql.includes(requiredToken)) return;
+
+  console.log(`Migrating table "${table}": missing ${requiredToken} in CHECK constraint`);
+
+  db.pragma('foreign_keys = OFF');
+  const tx = db.transaction(rebuild);
+  try {
+    tx();
+    console.log(`✓ Migrated "${table}"`);
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
 }
 
 /**
