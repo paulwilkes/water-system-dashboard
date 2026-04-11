@@ -942,10 +942,8 @@
         </div>
 
         <div class="btn-group">
-          <!-- TODO: Re-enable after Twilio campaign approval (~2 weeks) -->
-          <button class="btn btn-secondary" id="btn-test" disabled title="Texting disabled — awaiting campaign approval">📱 Send Test to My Phone</button>
-          <button class="btn btn-primary" id="btn-send" disabled title="Texting disabled — awaiting campaign approval">📤 Send to Subscribers</button>
-          <p style="width:100%; text-align:center; font-size:13px; color:var(--text-muted); margin-top:8px;">⏳ Text messaging disabled — awaiting carrier campaign approval</p>
+          <button class="btn btn-secondary" id="btn-test" onclick="sendTest()">📱 Send Test to My Phone</button>
+          <button class="btn btn-primary" id="btn-send" onclick="openConfirmModal()">📤 Send to Subscribers</button>
         </div>
       </div>
     </div>
