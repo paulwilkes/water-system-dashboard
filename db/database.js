@@ -132,6 +132,12 @@ export function initDatabase() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_unsubscribe_tokens_email ON unsubscribe_tokens(email);
+
+    CREATE TABLE IF NOT EXISTS chlorine_alert_state (
+      id                    INTEGER PRIMARY KEY CHECK(id = 1),
+      last_stale_alert_at   TEXT
+    );
+    INSERT OR IGNORE INTO chlorine_alert_state (id, last_stale_alert_at) VALUES (1, NULL);
   `);
 
   runMigrations();
@@ -578,6 +584,19 @@ export function markUnsubscribeTokenUsed(token) {
   return db.prepare(`
     UPDATE unsubscribe_tokens SET used_at = datetime('now') WHERE token = ?
   `).run(token);
+}
+
+// ─── Chlorine Alert State ──────────────────────────────────
+
+export function getLastStaleAlertAt() {
+  const row = db.prepare('SELECT last_stale_alert_at FROM chlorine_alert_state WHERE id = 1').get();
+  return row?.last_stale_alert_at || null;
+}
+
+export function markStaleAlertSent() {
+  return db.prepare(
+    "UPDATE chlorine_alert_state SET last_stale_alert_at = datetime('now') WHERE id = 1"
+  ).run();
 }
 
 // ─── Utilities ──────────────────────────────────────────────

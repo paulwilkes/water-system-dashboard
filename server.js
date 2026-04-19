@@ -18,8 +18,10 @@ import alertRoutes from './api/routes/alerts.js';
 import subscriberRoutes from './api/routes/subscribers.js';
 import sensorRoutes from './api/routes/sensors.js';
 import emailRoutes, { handleUnsubscribe } from './api/routes/emails.js';
+import chlorineRoutes from './api/routes/chlorine.js';
 import refreshData from './api/refresh-data.js';
 import { startMQTT } from './lib/yolink-mqtt.js';
+import { startStaleCheckScheduler } from './lib/chlorine-notifier.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -150,6 +152,9 @@ app.get('/unsubscribe', (req, res) => {
 // Public unsubscribe API (no auth) — must be registered BEFORE the protected /api/emails mount
 app.post('/api/emails/unsubscribe', handleUnsubscribe);
 
+// Chlorine form webhook (no auth — authenticates via X-Webhook-Secret header)
+app.use('/api/chlorine', chlorineRoutes);
+
 // ── Static files (CSS, JS, images, opt-in, privacy, terms, data) ──
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -192,4 +197,7 @@ app.listen(PORT, '0.0.0.0', () => {
       .then(() => console.log('Scheduled refresh complete'))
       .catch(err => console.error('Scheduled refresh failed:', err.message));
   }, ONE_HOUR);
+
+  // Hourly check for stale chlorine data → branded board alert via Resend
+  startStaleCheckScheduler();
 });
