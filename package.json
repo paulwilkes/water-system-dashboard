@@ -9,6 +9,9 @@
     "mqtt": "node lib/yolink-mqtt.js",
     "db:seed": "node db/seed.js",
     "sensor-events": "node lib/view-sensor-events.js",
+    "user:list": "node manage-users.js list",
+    "user:add": "node manage-users.js add",
+    "user:remove": "node manage-users.js remove",
     "test:yolink": "node test-yolink.js",
     "test:sheets": "node test-sheets.js"
   },
