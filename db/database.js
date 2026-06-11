@@ -138,6 +138,21 @@ export function initDatabase() {
       last_stale_alert_at   TEXT
     );
     INSERT OR IGNORE INTO chlorine_alert_state (id, last_stale_alert_at) VALUES (1, NULL);
+
+    CREATE TABLE IF NOT EXISTS inbound_messages (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      from_number     TEXT,
+      to_number       TEXT,
+      body            TEXT,
+      message_sid     TEXT,
+      kind            TEXT NOT NULL DEFAULT 'forward'
+                        CHECK(kind IN ('forward','stop','help')),
+      forwarded_count INTEGER DEFAULT 0,
+      created_at      TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_inbound_messages_from ON inbound_messages(from_number);
+    CREATE INDEX IF NOT EXISTS idx_inbound_messages_created ON inbound_messages(created_at);
   `);
 
   runMigrations();
@@ -597,6 +612,45 @@ export function markStaleAlertSent() {
   return db.prepare(
     "UPDATE chlorine_alert_state SET last_stale_alert_at = datetime('now') WHERE id = 1"
   ).run();
+}
+
+// ─── Inbound SMS Queries ────────────────────────────────────
+
+/**
+ * Log an inbound text message received on the Twilio number.
+ * kind: 'forward' (relayed to the board), 'stop' (opt-out), or 'help'.
+ */
+export function logInboundMessage({ from_number, to_number, body, message_sid, forwarded_count, kind }) {
+  return db.prepare(`
+    INSERT INTO inbound_messages (from_number, to_number, body, message_sid, kind, forwarded_count)
+    VALUES (@from_number, @to_number, @body, @message_sid, @kind, @forwarded_count)
+  `).run({
+    from_number: from_number || null,
+    to_number: to_number || null,
+    body: body || null,
+    message_sid: message_sid || null,
+    kind: kind || 'forward',
+    forwarded_count: forwarded_count || 0
+  });
+}
+
+/**
+ * Get recent inbound messages (most recent first)
+ */
+export function getInboundMessages(limit = 50, offset = 0) {
+  return db.prepare(
+    'SELECT * FROM inbound_messages ORDER BY created_at DESC LIMIT ? OFFSET ?'
+  ).all(limit, offset);
+}
+
+/**
+ * Mark a phone number as opted out (in response to an inbound STOP).
+ * No-op if the number isn't a known subscriber.
+ */
+export function optOutByPhone(phone) {
+  return db.prepare(
+    "UPDATE subscribers SET status = 'opted_out', updated_at = datetime('now') WHERE phone = ?"
+  ).run(normalizePhone(phone));
 }
 
 // ─── Utilities ──────────────────────────────────────────────

@@ -13,20 +13,14 @@ import {
   logDelivery,
   getDeliveryLog
 } from '../../db/database.js';
-import TwilioService from '../../lib/twilio.js';
+import TwilioService, { createTwilioServiceFromEnv } from '../../lib/twilio.js';
 
 const router = Router();
 
 /**
  * Get a configured TwilioService instance
  */
-function getTwilioService() {
-  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER } = process.env;
-  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
-    return null;
-  }
-  return new TwilioService(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER);
-}
+const getTwilioService = createTwilioServiceFromEnv;
 
 /**
  * POST /api/alerts/send

@@ -29,6 +29,22 @@ A real-time monitoring dashboard and SMS alert system for the Beulah Park Water 
 - **Opt-in page** at `optin.beulahparkws.org` — Public signup form for SMS alerts
 - **Privacy Policy & Terms** — Twilio-compliant legal pages
 
+### Public Contact / Board Site
+- **Contact page** at `info.beulahparkws.org` (configurable via `PUBLIC_SITE_HOSTNAME`)
+  — `public/contact.html`, a no-JS static page so it renders even with scripts off
+- Tells customers **who to call for a water leak or emergency**: the local 206
+  number (click-to-call / click-to-text), the board roster, and the operator's role
+- Edit content directly in `public/contact.html` (search for `EDIT:` markers)
+
+### Inbound SMS (Auto-Reply + Forward to Board)
+- Customers can **text the 206 number**; the webhook (`POST /api/sms/incoming`):
+  1. **Auto-replies** to the sender ("Message received — a board member will contact you shortly")
+  2. **Forwards** the text to board cell phones (`BOARD_SMS_RECIPIENTS`) so a local
+     member can respond — ideal for a 2am gushing-pipe call
+- **STOP/HELP** keywords are honored for compliance and never forwarded
+- Authenticated by validating the **Twilio request signature** (no shared secret needed)
+- Inbound messages are logged to the `inbound_messages` table
+
 ### Security & Authentication
 - **Google OAuth 2.0** — Email-based allowlist stored in SQLite
 - **Protected routes** — Dashboard and alerts require authentication
@@ -164,6 +180,23 @@ Deployed on Fly.io with:
 ```bash
 fly deploy
 ```
+
+### Twilio inbound SMS setup
+
+1. In the [Twilio Console](https://console.twilio.com/) → your 206 number → **Messaging
+   Configuration**, set **"A message comes in"** to:
+   `https://dashboard.beulahparkws.org/api/sms/incoming` (HTTP POST).
+   *(The webhook works on any of the app's hostnames — pick one Twilio can reach.)*
+2. Set `TWILIO_PHONE_NUMBER` to the 206 number and `BOARD_SMS_RECIPIENTS` to the board's
+   cell numbers (comma-separated, E.164) via `fly secrets set`.
+3. If your number is in a **Messaging Service** with Advanced Opt-Out enabled, Twilio
+   handles STOP/HELP before the webhook; otherwise this app handles them itself. Both work.
+4. Test by texting the number — you should get the auto-reply and the board should get the forward.
+
+### Public contact site DNS
+
+Point `info.beulahparkws.org` (or whatever `PUBLIC_SITE_HOSTNAME` is set to) at the Fly app
+and add the hostname as a Fly cert: `fly certs add info.beulahparkws.org`.
 
 ## Troubleshooting
 

@@ -19,6 +19,7 @@ import subscriberRoutes from './api/routes/subscribers.js';
 import sensorRoutes from './api/routes/sensors.js';
 import emailRoutes, { handleUnsubscribe } from './api/routes/emails.js';
 import chlorineRoutes from './api/routes/chlorine.js';
+import smsRoutes from './api/routes/sms.js';
 import refreshData from './api/refresh-data.js';
 import { startMQTT } from './lib/yolink-mqtt.js';
 import { startStaleCheckScheduler } from './lib/chlorine-notifier.js';
@@ -77,6 +78,28 @@ app.use((req, res, next) => {
     if (req.path === '/terms.html') return res.sendFile(path.join(__dirname, 'public', 'terms.html'));
     // Everything else → serve opt-in page
     return res.sendFile(path.join(__dirname, 'public', 'opt-in.html'));
+  }
+  next();
+});
+
+// ── Hostname-based routing for the public info site ──
+// Fully public (runs before auth). The new BPWS public website (Home,
+// Contact & Board, Resources) lives under public/site/. Set
+// PUBLIC_SITE_HOSTNAME to the staging subdomain while overhauling.
+const PUBLIC_SITE_HOSTNAME = process.env.PUBLIC_SITE_HOSTNAME || 'new.beulahparkws.org';
+const sitePage = (name) => path.join(__dirname, 'public', 'site', name);
+app.use((req, res, next) => {
+  if (req.hostname === PUBLIC_SITE_HOSTNAME) {
+    // Static assets (CSS, images, fonts, the hosted PDFs) fall through to express.static
+    if (req.path.match(/\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|pdf)$/)) return next();
+    // Page routes
+    if (req.path === '/' || req.path === '/home') return res.sendFile(sitePage('home.html'));
+    if (req.path === '/contact' || req.path === '/contact.html') return res.sendFile(sitePage('contact.html'));
+    if (req.path === '/resources' || req.path === '/resources.html') return res.sendFile(sitePage('resources.html'));
+    if (req.path === '/privacy.html') return res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+    if (req.path === '/terms.html') return res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+    // Unknown path on the public host → home
+    return res.sendFile(sitePage('home.html'));
   }
   next();
 });
@@ -154,6 +177,9 @@ app.post('/api/emails/unsubscribe', handleUnsubscribe);
 
 // Chlorine form webhook (no auth — authenticates via X-Webhook-Secret header)
 app.use('/api/chlorine', chlorineRoutes);
+
+// Inbound SMS webhook (no auth — authenticates via Twilio request signature)
+app.use('/api/sms', smsRoutes);
 
 // ── Static files (CSS, JS, images, opt-in, privacy, terms, data) ──
 app.use(express.static(path.join(__dirname, 'public')));
