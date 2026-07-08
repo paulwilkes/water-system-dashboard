@@ -4,80 +4,95 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contact &amp; the board · Beulah Park Water System</title>
-<meta name="description" content="How to reach Beulah Park Water System: text the local 206 line for emergencies, Northwest Water for billing, and the volunteer board for everything else.">
+<meta name="description" content="How to reach Beulah Park Water System: text the local line for emergencies, Northwest Water for billing, and the volunteer board of neighbors for everything else.">
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site/site.css">
+<script src="/site/site.js" defer></script>
 </head>
 <body>
-<div class="page">
+<div class="room">
 
-  <header class="masthead">
-    <a class="brand" href="/">
+  <header class="topbar">
+    <div class="brand lg">
       <img class="leaf" src="/site/assets/leaf.png" alt="Beulah Park leaf">
-      <span class="wordmark">
-        <b>Beulah Park Water System</b>
-        <small>Vashon Island · Community-owned</small>
-      </span>
-    </a>
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
-    <label for="nav-toggle" class="nav-burger" aria-label="Toggle menu"><span></span><span></span><span></span></label>
-    <nav class="nav-links" aria-label="Primary">
-      <a class="nav-link active" href="/contact">Contact &amp; Board</a>
-      <a class="nav-link" href="/resources">Resources</a>
-      <a class="report-leak" href="#emergency">Report a leak</a>
+      <a class="home-link" href="/">← Home</a>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a class="active" href="/contact">Contact &amp; Board</a>
+      <a href="/resources">Resources</a>
+      <a href="/leak">Report a leak</a>
     </nav>
   </header>
 
-  <div class="page-head">
-    <h1 class="page-title">Contact &amp; the board</h1>
-    <p class="page-lede">One text line for emergencies, one operator for billing, one email for everything else, and the neighbors behind all three.</p>
-  </div>
+  <main class="content">
+    <span class="headline" style="font-size: 64px;">BPWS directory</span>
 
-  <section class="emergency-band" id="emergency">
-    <div class="lead">
-      <span class="eyebrow">Emergencies</span>
-      <span class="num">Text (206) 350-4374</span>
-    </div>
-    <span class="desc">Texts ring every board member’s phone at once. Include your name, address, and what you see. Non-urgent texts are welcome too, but email is better for those. Texts only; the line doesn’t take calls, and we’ll reply to the number you text from.</span>
-    <a class="btn-cream" href="sms:+12063504374">Text the BPWS line</a>
-  </section>
+    <div class="dir-grid">
 
-  <div class="contact-grid">
-    <div class="board-card full">
-      <span class="block-label">Your board</span>
-      <span class="board-row"><span class="name">Ian Salkind</span><span class="role">President</span></span>
-      <span class="board-row"><span class="name">Stefan Kovalenko</span><span class="role">Treasurer</span></span>
-      <span class="board-row"><span class="name">Carmen Cejudo</span><span class="role">Board member</span></span>
-      <span class="board-row"><span class="name">Paul Wilkes</span><span class="role">Board member</span></span>
-      <span class="board-row"><span class="name">Laura Merchant</span><span class="role">Board member</span></span>
-      <span class="board-foot">Reach the whole board at <strong>board@beulahparkws.org</strong>. We’re volunteers and neighbors, and we read everything.</span>
-    </div>
-
-    <div class="contact-col">
-      <div class="contact-card green">
-        <span class="card-label">Operator · Billing · 24-hr service</span>
-        <span class="card-name">Northwest Water Systems</span>
-        <span class="card-phone">(360) 876-0958</span>
-        <span class="card-meta">PO Box 123, Port Orchard, WA 98366</span>
-        <span class="note-terra">Northwest Water is off-island. For anything urgent, text the 206 line first so neighbors can respond.</span>
-        <span class="note-green">New to Beulah Park? Call them first to set up your account, then email the board with any questions.</span>
+      <div class="col">
+        <span class="col-head">Who to reach</span>
+        <div class="row">
+          <span class="label">Leak, outage, emergency</span>
+          <span class="leader"></span>
+          <a class="val terra" href="sms:+12063504374">text (206) 350-4374</a>
+        </div>
+        <div class="row">
+          <span class="label">Billing &amp; service <span class="muted">(NW Water)</span></span>
+          <span class="leader"></span>
+          <a class="val" href="tel:+13608760958">(360) 876-0958</a>
+        </div>
+        <div class="row">
+          <span class="label">Everything else</span>
+          <span class="leader"></span>
+          <a class="val" href="#" data-board-mailto data-board-email>the board</a>
+        </div>
+        <div class="row">
+          <span class="label">Mail</span>
+          <span class="leader"></span>
+          <span class="val body">PO Box 2655, Vashon, WA 98070</span>
+        </div>
       </div>
-      <div class="contact-card leaf">
-        <span class="card-label">Write to us</span>
-        <span class="card-meta">PO Box 2655, Vashon, WA 98070<br><strong>board@beulahparkws.org</strong></span>
-      </div>
-    </div>
-  </div>
 
-  <footer class="colophon">
-    <img class="leaf" src="/site/assets/leaf.png" alt="">
-    <span>PO Box 2655, Vashon, WA 98070</span>
-    <a href="mailto:board@beulahparkws.org"><span>board@beulahparkws.org</span></a>
-    <a class="end" href="https://optin.beulahparkws.org"><span>Text alerts sign-up&nbsp;↗</span></a>
-  </footer>
+      <div class="col">
+        <span class="col-head">Your board</span>
+        <div class="row">
+          <span class="label">Ian Salkind</span>
+          <span class="leader"></span>
+          <span class="role">President</span>
+        </div>
+        <div class="row">
+          <span class="label">Stefan Kovalenko</span>
+          <span class="leader"></span>
+          <span class="role">Treasurer</span>
+        </div>
+        <div class="row">
+          <span class="label">Carmen Cejudo</span>
+          <span class="leader"></span>
+          <span class="role">Board member</span>
+        </div>
+        <div class="row">
+          <span class="label">Paul Wilkes</span>
+          <span class="leader"></span>
+          <span class="role">Board member</span>
+        </div>
+        <div class="row">
+          <span class="label">Laura Merchant</span>
+          <span class="leader"></span>
+          <span class="role">Board member</span>
+        </div>
+        <span class="col-note">We're volunteers and neighbors. Reach all of us at <a class="mail" href="#" data-board-mailto data-board-email>the board</a>.</span>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="meta">
+    <span>Northwest Water Systems runs day-to-day operations for us.</span>
+    <span class="right">Vashon Island · Community-owned</span>
+  </div>
 
 </div>
 </body>

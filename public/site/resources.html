@@ -10,89 +10,79 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site/site.css">
+<script src="/site/site.js" defer></script>
 <!--
-  Resources are stubbed as "Coming soon" for the board preview. When a target
-  is ready, turn that .res-row back into <a href="..."> and drop the
-  .res-soon "Coming soon" tag:
-   • Water quality report → hosted CCR PDF
-   • Rules & regulations, Water efficiency, Emergency preparedness → pages/PDFs
-   • Annual meeting → recording/slides link
+  Resource targets are placeholders (href="#") until the files are ready:
+  water quality CCR PDF, rules & regs, efficiency, emergency prep, annual
+  meeting recording/slides. Swap each href when the target lands.
 -->
 </head>
 <body>
-<div class="page">
+<div class="room">
 
-  <header class="masthead">
-    <a class="brand" href="/">
+  <header class="topbar">
+    <div class="brand lg">
       <img class="leaf" src="/site/assets/leaf.png" alt="Beulah Park leaf">
-      <span class="wordmark">
-        <b>Beulah Park Water System</b>
-        <small>Vashon Island · Community-owned</small>
-      </span>
-    </a>
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true">
-    <label for="nav-toggle" class="nav-burger" aria-label="Toggle menu"><span></span><span></span><span></span></label>
-    <nav class="nav-links" aria-label="Primary">
-      <a class="nav-link" href="/contact">Contact &amp; Board</a>
-      <a class="nav-link active" href="/resources">Resources</a>
-      <a class="report-leak" href="/#emergency">Report a leak</a>
+      <a class="home-link" href="/">← Home</a>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="/contact">Contact &amp; Board</a>
+      <a class="active" href="/resources">Resources</a>
+      <a href="/leak">Report a leak</a>
     </nav>
   </header>
 
-  <div class="page-head">
-    <h1 class="page-title">Resources</h1>
-    <p class="page-lede">Reports, rules, and good habits. Everything about your water, in one list.</p>
-  </div>
+  <main class="content">
+    <div class="stack">
+      <span class="headline" style="font-size: 56px;">Everything about your water.</span>
+      <span class="res-sub">Reports, rules, and good habits, in one list.</span>
+    </div>
 
-  <div class="res-wrap">
     <div class="res-list">
-      <div class="res-row coming">
+      <a class="res-row" href="#">
         <span class="res-main">
           <span class="res-title">Water quality report</span>
-          <span class="res-desc">The latest annual report on what’s in your water.</span>
+          <span class="res-desc">The latest annual report on what's in your water.</span>
         </span>
-        <span class="pill">PDF</span>
-        <span class="res-soon">Coming soon</span>
-      </div>
-      <div class="res-row coming">
+        <span class="res-tag">PDF</span>
+        <span class="res-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="res-row" href="#">
         <span class="res-main">
           <span class="res-title">Rules &amp; regulations</span>
           <span class="res-desc">How a Group A water system keeps water safe, and what we ask of members.</span>
         </span>
-        <span class="res-soon">Coming soon</span>
-      </div>
-      <div class="res-row coming">
+        <span class="res-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="res-row" href="#">
         <span class="res-main">
           <span class="res-title">Water efficiency</span>
           <span class="res-desc">Saving water at home and in the garden. One well, shared by all of us.</span>
         </span>
-        <span class="res-soon">Coming soon</span>
-      </div>
-      <div class="res-row coming">
+        <span class="res-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="res-row" href="#">
         <span class="res-main">
           <span class="res-title">Emergency preparedness</span>
           <span class="res-desc">PNW basics: storing water, outages, and being ready for the unexpected.</span>
         </span>
-        <span class="res-soon">Coming soon</span>
-      </div>
-      <div class="res-row coming">
+        <span class="res-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="res-row" href="#">
         <span class="res-main">
           <span class="res-title">Annual meeting: recording &amp; slides</span>
-          <span class="res-desc">Catch up on the most recent members’ meeting.</span>
+          <span class="res-desc">Catch up on the most recent members' meeting.</span>
         </span>
-        <span class="pill">Video</span>
-        <span class="res-soon">Coming soon</span>
-      </div>
+        <span class="res-tag">Video</span>
+        <span class="res-arrow" aria-hidden="true">→</span>
+      </a>
     </div>
-    <span class="res-foot">Looking for something that isn’t here? Email <strong>board@beulahparkws.org</strong> and we’ll add it.</span>
-  </div>
+  </main>
 
-  <footer class="colophon">
-    <img class="leaf" src="/site/assets/leaf.png" alt="">
-    <span>PO Box 2655, Vashon, WA 98070</span>
-    <a href="mailto:board@beulahparkws.org"><span>board@beulahparkws.org</span></a>
-    <a class="end" href="https://optin.beulahparkws.org"><span>Text alerts sign-up&nbsp;↗</span></a>
-  </footer>
+  <div class="meta">
+    <span>Something missing? Email <a class="mail" href="#" data-board-mailto data-board-email>the board</a> and we'll add it.</span>
+    <span class="right">Vashon Island · Community-owned</span>
+  </div>
 
 </div>
 </body>

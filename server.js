@@ -94,6 +94,8 @@ app.use((req, res, next) => {
     if (req.path.match(/\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|pdf)$/)) return next();
     // Page routes
     if (req.path === '/' || req.path === '/home') return res.sendFile(sitePage('home.html'));
+    if (req.path === '/leak' || req.path === '/leak.html') return res.sendFile(sitePage('leak.html'));
+    if (req.path === '/welcome' || req.path === '/welcome.html') return res.sendFile(sitePage('welcome.html'));
     if (req.path === '/contact' || req.path === '/contact.html') return res.sendFile(sitePage('contact.html'));
     if (req.path === '/resources' || req.path === '/resources.html') return res.sendFile(sitePage('resources.html'));
     if (req.path === '/privacy.html') return res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
