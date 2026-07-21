@@ -3,174 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMS Terms &amp; Conditions — Beulah Park Water System</title>
+<title>SMS Terms &amp; Conditions · Beulah Park Water System</title>
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f1eb;
-    --card: #ffffff;
-    --coral: #e8927c;
-    --text: #2c2c2c;
-    --text-muted: #8a8a8a;
-    --border: #e8e4de;
-    --shadow: 0 2px 12px rgba(0,0,0,0.06);
-    --radius: 16px;
-    --radius-sm: 10px;
+    --green:#2C4023; --cream:#F1EEDD; --cream-hi:#FFFFFF;
+    --body:#DDE2C8; --secondary:#C9D3B4; --tertiary:#A9B98F;
+    --terra:#E8A87E; --terra-hi:#F4CDB3;
+    --hair:rgba(241,238,221,0.22);
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+    --sans:'Public Sans',system-ui,-apple-system,sans-serif;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: var(--sans);
+    background: var(--green);
+    color: var(--body);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+  a { color: inherit; }
 
   .header {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex;
-    align-items: center;
-    height: 64px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 22px 34px; border-bottom: 1px solid var(--hair);
   }
+  .logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+  .logo-icon { width: 26px; height: auto; }
+  .system-name { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--secondary); font-weight: 600; }
+  .site-link { font-size: 13px; color: var(--tertiary); text-decoration: none; transition: color 0.15s ease; }
+  .site-link:hover { color: var(--cream); }
 
-  .logo-link {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    text-decoration: none;
-    color: inherit;
-  }
+  .container { max-width: 680px; margin: 0 auto; padding: 44px 34px 64px; }
 
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-    border-radius: 0;
-  }
+  .page-title { font-family: var(--serif); font-weight: 500; font-size: 40px; line-height: 1.05; letter-spacing: -0.01em; color: var(--cream); }
+  .effective-date { color: var(--tertiary); font-size: 14px; margin-top: 12px; }
 
-  .system-name {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text);
-  }
+  .prose { margin-top: 36px; }
+  .prose h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; color: var(--cream); margin: 32px 0 12px; }
+  .prose h2:first-of-type { margin-top: 0; }
+  .prose p { font-size: 15px; line-height: 1.7; color: var(--body); margin-bottom: 12px; }
+  .prose ul { margin: 8px 0 14px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .prose li { font-size: 15px; line-height: 1.6; color: var(--body); padding-left: 22px; position: relative; }
+  .prose li::before { content: ""; position: absolute; left: 2px; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--terra); }
+  .prose strong { color: var(--cream); font-weight: 600; }
+  .prose a { color: var(--terra); text-decoration: underline; text-underline-offset: 2px; }
+  .prose a:hover { color: var(--terra-hi); }
 
-  .container {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 40px 20px 60px;
-  }
+  .back-link { display: inline-block; margin-top: 36px; font-size: 15px; color: var(--secondary); text-decoration: none; transition: color 0.15s ease; }
+  .back-link:hover { color: var(--cream); }
 
-  .page-title {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-
-  .effective-date {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 14px;
-    margin-bottom: 32px;
-  }
-
-  .content-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 36px 32px;
-    margin-bottom: 24px;
-  }
-
-  .content-card h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
-    font-weight: 600;
-    margin-top: 28px;
-    margin-bottom: 12px;
-  }
-
-  .content-card h2:first-child {
-    margin-top: 0;
-  }
-
-  .content-card p {
-    font-size: 15px;
-    line-height: 1.7;
-    margin-bottom: 12px;
-    color: var(--text);
-  }
-
-  .content-card ul, .content-card ol {
-    margin: 8px 0 12px 20px;
-    font-size: 15px;
-    line-height: 1.7;
-  }
-
-  .content-card li {
-    margin-bottom: 4px;
-  }
-
-  .content-card a {
-    color: var(--coral);
-    text-decoration: none;
-  }
-
-  .content-card a:hover {
-    text-decoration: underline;
-  }
-
-  .back-link {
-    display: inline-block;
-    margin-bottom: 24px;
-    color: var(--coral);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .back-link:hover {
-    text-decoration: underline;
-  }
-
-  .footer {
-    text-align: center;
-    padding: 24px 20px;
-    font-size: 13px;
-    color: var(--text-muted);
-  }
+  .footer { border-top: 1px solid var(--hair); margin-top: 40px; padding-top: 24px; font-size: 13px; color: var(--tertiary); }
 
   @media (max-width: 600px) {
-    .header { padding: 0 16px; }
-    .container { padding: 24px 16px 40px; }
-    .content-card { padding: 24px 20px; }
-    .page-title { font-size: 24px; }
+    .header { padding: 18px 20px; }
+    .container { padding: 32px 20px 44px; }
+    .page-title { font-size: 32px; }
   }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <a class="logo-link" href="/">
-    <img class="logo-icon" src="/images/bpws-logo.png" alt="BPWS">
-    <span class="system-name">Beulah Park Water</span>
+  <a class="logo-link" href="https://beulahparkws.org/">
+    <img class="logo-icon" src="/site/assets/leaf.png" alt="Beulah Park leaf">
+    <span class="system-name">Beulah Park Water System</span>
   </a>
+  <a class="site-link" href="/opt-in.html">Back to sign up&nbsp;→</a>
 </div>
 
 <div class="container">
 
-  <a class="back-link" href="/opt-in.html">&larr; Back to Sign Up</a>
-
   <h1 class="page-title">SMS Terms &amp; Conditions</h1>
   <p class="effective-date">Effective Date: February 15, 2026</p>
 
-  <div class="content-card">
+  <div class="prose">
 
     <h2>Agreement to Terms</h2>
     <p>By opting in to the Beulah Park Water System SMS Alert Service ("Service"), you agree to these Terms and Conditions. Please read them carefully before signing up. If you do not agree to these terms, do not sign up for the Service.</p>
@@ -224,11 +135,15 @@
     <p>If you have questions about these terms or the SMS Alert Service, please contact us:</p>
     <p>
       Beulah Park Water System<br>
-      Phone: (614) 595-2412<br>
+      PO Box 2655, Vashon, WA 98070<br>
+      Email: board@beulahparkws.org<br>
+      Text: (206) 350-4374<br>
       Website: beulahparkws.org
     </p>
 
   </div>
+
+  <a class="back-link" href="/opt-in.html">← Back to sign up</a>
 
   <div class="footer">
     &copy; 2026 Beulah Park Water System
