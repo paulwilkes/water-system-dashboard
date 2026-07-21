@@ -3,329 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign Up for Water Alerts — Beulah Park Water System</title>
+<title>Sign up for water alerts · Beulah Park Water System</title>
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f4f1eb;
-    --card: #ffffff;
-    --coral: #e8927c;
-    --coral-light: #fdf0ec;
-    --mint: #7ec8a4;
-    --mint-light: #edf8f2;
-    --blue: #7caee8;
-    --blue-light: #ecf3fd;
-    --red: #d9534f;
-    --red-light: #fdecea;
-    --text: #2c2c2c;
-    --text-muted: #8a8a8a;
-    --border: #e8e4de;
-    --shadow: 0 2px 12px rgba(0,0,0,0.06);
-    --radius: 16px;
-    --radius-sm: 10px;
+    --green:#2C4023; --green-dark:#1F2F18;
+    --cream:#F1EEDD; --cream-hi:#FFFFFF; --cream-input:#F7F2E6;
+    --body:#DDE2C8; --secondary:#C9D3B4; --tertiary:#A9B98F;
+    --terra:#E8A87E; --terra-hi:#F4CDB3;
+    --ink:#28301F;
+    --hair:rgba(241,238,221,0.22);
+    --hair-strong:rgba(241,238,221,0.30);
+    --serif:'Newsreader',Georgia,'Times New Roman',serif;
+    --sans:'Public Sans',system-ui,-apple-system,sans-serif;
+    --radius:4px;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: var(--sans);
+    background: var(--green);
+    color: var(--body);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
+  a { color: inherit; }
 
   /* ── Header ── */
   .header {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
     display: flex;
     align-items: center;
-    height: 64px;
-  }
-
-  .logo-link {
-    display: flex;
-    align-items: center;
+    justify-content: space-between;
     gap: 16px;
-    text-decoration: none;
-    color: inherit;
+    padding: 22px 34px;
+    border-bottom: 1px solid var(--hair);
   }
-
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-    border-radius: 0;
-  }
-
+  .logo-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+  .logo-icon { width: 26px; height: auto; }
   .system-name {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--secondary);
     font-weight: 600;
-    color: var(--text);
   }
+  .site-link { font-size: 13px; color: var(--tertiary); text-decoration: none; transition: color 0.15s ease; }
+  .site-link:hover { color: var(--cream); }
 
-  /* ── Main Content ── */
-  .container {
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 40px 20px 60px;
-  }
+  /* ── Main ── */
+  .container { max-width: 560px; margin: 0 auto; padding: 48px 34px 64px; }
 
   /* ── Hero ── */
-  .hero {
-    text-align: center;
-    margin-bottom: 32px;
+  .hero { margin-bottom: 36px; }
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--tertiary);
   }
-
-  .hero-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-  }
-
   .hero h1 {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    line-height: 1.3;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 44px;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--cream);
+    margin: 14px 0 16px;
   }
+  .hero p { color: var(--body); font-size: 17px; line-height: 1.6; }
 
-  .hero p {
-    color: var(--text-muted);
-    font-size: 16px;
-    line-height: 1.5;
-  }
-
-  /* ── Form Card ── */
-  .form-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 32px;
-    margin-bottom: 24px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
+  /* ── Form ── */
+  .form-card { margin-bottom: 28px; }
+  .form-group { margin-bottom: 22px; }
   .form-group label {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--text);
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    color: var(--cream);
   }
-
   .form-group input {
     width: 100%;
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif;
+    padding: 13px 16px;
+    border: 1.5px solid transparent;
+    border-radius: var(--radius);
+    font-family: var(--sans);
     font-size: 16px;
-    color: var(--text);
-    background: var(--card);
-    transition: border-color 0.2s;
+    color: var(--ink);
+    background: var(--cream-input);
+    transition: border-color 0.15s;
     -webkit-appearance: none;
   }
+  .form-group input:focus { outline: none; border-color: var(--terra); }
+  .form-group input::placeholder { color: #8a8672; }
+  .form-group .hint { font-size: 13px; color: var(--tertiary); margin-top: 6px; }
 
-  .form-group input:focus {
-    outline: none;
-    border-color: var(--blue);
-  }
-
-  .form-group input::placeholder {
-    color: var(--text-muted);
-  }
-
-  .form-group .hint {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-top: 4px;
-  }
-
-  /* ── Consent Checkbox ── */
+  /* ── Consent ── */
   .consent-group {
-    margin: 24px 0;
+    margin: 26px 0;
     padding: 20px;
-    background: var(--blue-light);
-    border-radius: var(--radius-sm);
+    border: 1px solid var(--hair-strong);
+    border-radius: var(--radius);
+    background: rgba(0, 0, 0, 0.12);
   }
-
   .consent-label {
     display: flex;
     gap: 12px;
     align-items: flex-start;
     cursor: pointer;
     font-size: 14px;
-    line-height: 1.5;
-    color: var(--text);
+    line-height: 1.55;
+    color: var(--body);
   }
-
   .consent-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
+    width: 20px; height: 20px; min-width: 20px;
     margin-top: 2px;
-    accent-color: var(--coral);
+    accent-color: var(--terra);
     cursor: pointer;
   }
+  .consent-label a { color: var(--terra); text-decoration: underline; text-underline-offset: 2px; }
+  .consent-label a:hover { color: var(--terra-hi); }
 
-  .consent-label a {
-    color: var(--coral);
-    text-decoration: underline;
-  }
-
-  .consent-label a:hover {
-    color: #d4815d;
-  }
-
-  /* ── Submit Button ── */
+  /* ── Submit ── */
   .submit-btn {
     width: 100%;
-    padding: 14px;
-    background: var(--coral);
-    color: white;
+    padding: 15px;
+    background: var(--cream);
+    color: var(--green);
     border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
+    border-radius: var(--radius);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.15s;
   }
+  .submit-btn:hover { background: var(--cream-hi); }
+  .submit-btn:disabled { background: var(--tertiary); color: var(--green-dark); cursor: not-allowed; }
 
-  .submit-btn:hover {
-    background: #d4815d;
-    transform: translateY(-1px);
-  }
-
-  .submit-btn:active {
-    transform: translateY(0);
-  }
-
-  .submit-btn:disabled {
-    background: var(--border);
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  /* ── Error / Status Messages ── */
+  /* ── Error ── */
   .form-error {
     display: none;
-    background: var(--red-light);
-    color: var(--red);
+    background: rgba(153, 68, 31, 0.28);
+    color: var(--terra-hi);
     padding: 12px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    margin-bottom: 16px;
-  }
-
-  .form-error.visible {
-    display: block;
-  }
-
-  .form-info {
-    display: none;
-    background: var(--blue-light);
-    color: var(--blue);
-    padding: 12px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    margin-bottom: 16px;
-  }
-
-  .form-info.visible {
-    display: block;
-  }
-
-  /* ── Success State ── */
-  .success-card {
-    display: none;
-    background: var(--card);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 48px 32px;
-    text-align: center;
+    font-size: 14px;
+    margin-bottom: 16px;
   }
+  .form-error.visible { display: block; }
 
-  .success-card.visible {
-    display: block;
+  /* ── Success ── */
+  .success-card { display: none; padding: 4px 0 36px; }
+  .success-card.visible { display: block; }
+  .success-card .eyebrow { color: var(--terra); }
+  .success-card h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.1;
+    color: var(--cream);
+    margin: 14px 0;
   }
+  .success-card p { color: var(--body); font-size: 16px; line-height: 1.6; max-width: 44ch; }
 
-  .success-icon {
-    font-size: 56px;
+  /* ── Disclosure ── */
+  .disclosure { border-top: 1px solid var(--hair); padding-top: 32px; margin-bottom: 28px; }
+  .disclosure h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--cream);
     margin-bottom: 20px;
   }
-
-  .success-card h2 {
-    font-family: 'Fraunces', serif;
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .success-card p {
-    color: var(--text-muted);
-    font-size: 15px;
-    line-height: 1.6;
-    max-width: 380px;
-    margin: 0 auto;
-  }
-
-  /* ── Disclosure Section ── */
-  .disclosure {
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 28px 32px;
-    margin-bottom: 24px;
-  }
-
-  .disclosure h3 {
-    font-family: 'Fraunces', serif;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
-
   .disclosure-item {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
+    padding: 14px 0;
+    border-top: 1px solid var(--hair);
     font-size: 14px;
-    line-height: 1.5;
-    color: var(--text-muted);
+    line-height: 1.6;
+    color: var(--body);
   }
-
-  .disclosure-item:last-child {
-    margin-bottom: 0;
-  }
-
-  .disclosure-icon {
-    font-size: 16px;
-    min-width: 20px;
-    text-align: center;
-  }
+  .disclosure-item:first-of-type { border-top: none; padding-top: 0; }
+  .disclosure-item strong { color: var(--cream); font-weight: 600; }
+  .disclosure-item a { color: var(--terra); text-decoration: underline; text-underline-offset: 2px; }
+  .disclosure-item a:hover { color: var(--terra-hi); }
 
   /* ── Footer ── */
-  .footer {
-    text-align: center;
-    padding: 24px 20px;
-    font-size: 13px;
-    color: var(--text-muted);
-  }
+  .footer { border-top: 1px solid var(--hair); padding-top: 24px; font-size: 13px; color: var(--tertiary); }
+  .footer a { color: var(--tertiary); text-decoration: none; margin-right: 16px; transition: color 0.15s; }
+  .footer a:hover { color: var(--cream); }
+  .footer .copy { margin-top: 8px; color: var(--tertiary); }
 
   /* ── Responsive ── */
   @media (max-width: 600px) {
-    .header { padding: 0 16px; }
-    .container { padding: 24px 16px 40px; }
-    .form-card, .disclosure { padding: 24px 20px; }
-    .hero h1 { font-size: 24px; }
+    .header { padding: 18px 20px; }
+    .container { padding: 32px 20px 44px; }
+    .hero h1 { font-size: 34px; }
     .consent-group { padding: 16px; }
   }
 </style>
@@ -334,10 +215,11 @@
 
 <!-- Header -->
 <div class="header">
-  <a class="logo-link" href="/">
-    <img class="logo-icon" src="/images/bpws-logo.png" alt="BPWS">
+  <a class="logo-link" href="https://beulahparkws.org/">
+    <img class="logo-icon" src="/site/assets/leaf.png" alt="Beulah Park leaf">
     <span class="system-name">Beulah Park Water System</span>
   </a>
+  <a class="site-link" href="https://beulahparkws.org/">Back to site&nbsp;↗</a>
 </div>
 
 <!-- Main Content -->
@@ -345,9 +227,9 @@
 
   <!-- Hero -->
   <div class="hero">
-    <div class="hero-icon">📱</div>
-    <h1>Sign Up for Water System Alerts</h1>
-    <p>Get notified by text message when there are water service disruptions, repairs, or boil water notices.</p>
+    <span class="eyebrow">Text alerts</span>
+    <h1>Sign up for water alerts</h1>
+    <p>Get a text message when there are water service disruptions, repairs, or boil water notices on the Beulah Park system.</p>
   </div>
 
   <!-- Signup Form -->
@@ -357,12 +239,12 @@
       <div class="form-error" id="formError"></div>
 
       <div class="form-group">
-        <label for="name">Full Name</label>
+        <label for="name">Full name</label>
         <input type="text" id="name" name="name" placeholder="Jane Smith" required autocomplete="name">
       </div>
 
       <div class="form-group">
-        <label for="phone">Phone Number</label>
+        <label for="phone">Phone number</label>
         <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567" required autocomplete="tel">
         <div class="hint">US mobile number where you'd like to receive alerts</div>
       </div>
@@ -374,46 +256,31 @@
         </label>
       </div>
 
-      <button type="submit" class="submit-btn" id="submitBtn">Sign Up for Alerts</button>
+      <button type="submit" class="submit-btn" id="submitBtn">Sign up for alerts</button>
     </form>
   </div>
 
   <!-- Success State (hidden until form submits) -->
   <div class="success-card" id="successCard">
-    <div class="success-icon">✅</div>
-    <h2 id="successHeading">You're Signed Up!</h2>
+    <span class="eyebrow">All set</span>
+    <h2 id="successHeading">You're signed up.</h2>
     <p id="successMessage">You'll receive a text message when there are water system issues. Reply STOP at any time to unsubscribe.</p>
   </div>
 
   <!-- Disclosure -->
   <div class="disclosure">
-    <h3>About These Alerts</h3>
-    <div class="disclosure-item">
-      <span class="disclosure-icon">🔧</span>
-      <span><strong>What you'll receive:</strong> Notifications about water main repairs, service outages, and boil water notices affecting the Beulah Park water system.</span>
-    </div>
-    <div class="disclosure-item">
-      <span class="disclosure-icon">📅</span>
-      <span><strong>How often:</strong> Only when there's an active issue — typically a few times per year. We won't send marketing or promotional messages.</span>
-    </div>
-    <div class="disclosure-item">
-      <span class="disclosure-icon">🛑</span>
-      <span><strong>Opt out anytime:</strong> Reply STOP to any message to immediately unsubscribe. Reply HELP for assistance.</span>
-    </div>
-    <div class="disclosure-item">
-      <span class="disclosure-icon">💰</span>
-      <span><strong>Cost:</strong> This service is free. Standard message and data rates from your carrier may apply.</span>
-    </div>
-    <div class="disclosure-item">
-      <span class="disclosure-icon">📧</span>
-      <span><strong>Questions:</strong> <a href="https://beulahparkws.org/contact/" target="_blank" style="color: var(--coral); text-decoration: underline;">Contact the Beulah Park Water System office</a> for any questions about this alert service.</span>
-    </div>
+    <h3>About these alerts</h3>
+    <div class="disclosure-item"><strong>What you'll receive:</strong> Notifications about water main repairs, service outages, and boil water notices affecting the Beulah Park water system.</div>
+    <div class="disclosure-item"><strong>How often:</strong> Only when there's an active issue, typically a few times per year. We won't send marketing or promotional messages.</div>
+    <div class="disclosure-item"><strong>Opt out anytime:</strong> Reply STOP to any message to immediately unsubscribe. Reply HELP for assistance.</div>
+    <div class="disclosure-item"><strong>Cost:</strong> This service is free. Standard message and data rates from your carrier may apply.</div>
+    <div class="disclosure-item"><strong>Questions:</strong> <a href="https://beulahparkws.org/contact" target="_blank">Contact the Beulah Park Water System board</a> for any questions about this alert service.</div>
   </div>
 
   <div class="footer">
-    <a href="/privacy.html" style="color: var(--text-muted); text-decoration: none; margin-right: 16px;">Privacy Policy</a>
-    <a href="/terms.html" style="color: var(--text-muted); text-decoration: none;">Terms &amp; Conditions</a>
-    <div style="margin-top: 8px;">&copy; 2026 Beulah Park Water System</div>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms &amp; Conditions</a>
+    <div class="copy">&copy; 2026 Beulah Park Water System</div>
   </div>
 </div>
 
@@ -501,14 +368,14 @@
           showError(data.error || 'Something went wrong. Please try again.');
         }
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign Up for Alerts';
+        submitBtn.textContent = 'Sign up for alerts';
         return;
       }
 
-      // Success — swap form for confirmation
+      // Success: swap form for confirmation
       formCard.style.display = 'none';
       if (!consent) {
-        document.getElementById('successHeading').textContent = 'You\'re Registered!';
+        document.getElementById('successHeading').textContent = 'You\'re registered.';
         document.getElementById('successMessage').textContent = 'Your information has been saved, but you won\'t receive SMS alerts until you opt in. You can update your preferences anytime by contacting us.';
       }
       successCard.classList.add('visible');
@@ -516,7 +383,7 @@
     } catch (err) {
       showError('Unable to connect. Please check your connection and try again.');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign Up for Alerts';
+      submitBtn.textContent = 'Sign up for alerts';
     }
   });
 </script>
