@@ -321,6 +321,44 @@ a.val.terra:hover { color: var(--terra-hi); }
 }
 .res-arrow { font-family: var(--serif); font-size: 24px; color: var(--terra); }
 
+/* ── Article / long-form (resource content pages) ─────── */
+.article {
+  flex: 1;
+  padding: 44px var(--gutter) 56px;
+  position: relative;
+  z-index: 2;
+}
+.prose { max-width: 66ch; display: flex; flex-direction: column; gap: 34px; }
+.prose-head { display: flex; flex-direction: column; gap: 16px; }
+.article-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+}
+.prose-lede { font-size: 18px; line-height: 1.65; color: var(--body); margin: 0; }
+.prose section { display: flex; flex-direction: column; gap: 12px; }
+.prose h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; color: var(--cream); margin: 0; }
+.prose p { font-size: 16px; line-height: 1.7; color: var(--body); margin: 0; }
+.prose ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.prose li { font-size: 16px; line-height: 1.6; color: var(--body); padding-left: 22px; position: relative; }
+.prose li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--terra);
+}
+.prose a { color: var(--terra); text-decoration: underline; text-underline-offset: 3px; }
+.prose a:hover { color: var(--terra-hi); }
+.back-link { display: inline-block; margin-top: 8px; font-size: 15px; color: var(--secondary); transition: color 0.15s ease; }
+.back-link:hover { color: var(--cream); }
+
 /* ── Mobile ───────────────────────────────────────────── */
 @media (max-width: 760px) {
   :root { --gutter: 20px; }
@@ -340,6 +378,7 @@ a.val.terra:hover { color: var(--terra-hi); }
   .entry { font-size: 30px; }
 
   .headline { font-size: clamp(38px, 9vw, 64px) !important; }
+  .article-title { font-size: clamp(32px, 8vw, 48px); }
 
   .steps { grid-template-columns: 1fr; gap: 24px; }
   .dir-grid { grid-template-columns: 1fr; gap: 40px; }

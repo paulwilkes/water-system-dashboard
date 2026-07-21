@@ -98,6 +98,8 @@ app.use((req, res, next) => {
     if (req.path === '/welcome' || req.path === '/welcome.html') return res.sendFile(sitePage('welcome.html'));
     if (req.path === '/contact' || req.path === '/contact.html') return res.sendFile(sitePage('contact.html'));
     if (req.path === '/resources' || req.path === '/resources.html') return res.sendFile(sitePage('resources.html'));
+    if (req.path === '/water-efficiency' || req.path === '/water-efficiency.html') return res.sendFile(sitePage('water-efficiency.html'));
+    if (req.path === '/emergency-preparedness' || req.path === '/emergency-preparedness.html') return res.sendFile(sitePage('emergency-preparedness.html'));
     if (req.path === '/privacy.html') return res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
     if (req.path === '/terms.html') return res.sendFile(path.join(__dirname, 'public', 'terms.html'));
     // Unknown path on the public host → home
