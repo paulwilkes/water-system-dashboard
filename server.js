@@ -83,13 +83,15 @@ app.use((req, res, next) => {
 });
 
 // ── Hostname-based routing for the public info site ──
-// Fully public (runs before auth). The new BPWS public website (Home,
-// Contact & Board, Resources) lives under public/site/. Set
-// PUBLIC_SITE_HOSTNAME to the staging subdomain while overhauling.
-const PUBLIC_SITE_HOSTNAME = process.env.PUBLIC_SITE_HOSTNAME || 'new.beulahparkws.org';
+// Fully public (runs before auth). The BPWS public website lives under
+// public/site/. Served on the apex + www + the new. staging subdomain.
+// Override with PUBLIC_SITE_HOSTNAME (comma-separated) if needed.
+const PUBLIC_SITE_HOSTNAMES = (process.env.PUBLIC_SITE_HOSTNAME ||
+  'beulahparkws.org,www.beulahparkws.org,new.beulahparkws.org')
+  .split(',').map((h) => h.trim().toLowerCase()).filter(Boolean);
 const sitePage = (name) => path.join(__dirname, 'public', 'site', name);
 app.use((req, res, next) => {
-  if (req.hostname === PUBLIC_SITE_HOSTNAME) {
+  if (PUBLIC_SITE_HOSTNAMES.includes((req.hostname || '').toLowerCase())) {
     // Static assets (CSS, images, fonts, the hosted PDFs) fall through to express.static
     if (req.path.match(/\.(css|js|png|jpg|jpeg|svg|ico|json|woff2?|pdf)$/)) return next();
     // Page routes
