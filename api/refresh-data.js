@@ -85,6 +85,7 @@ async function refreshData() {
 
     // Per-tank calibration: height at 100% full and capacity in gallons
     const TANK_CALIBRATION = {
+      'd88b4c0120002bad': { heightCm: 16.1, capacityGal: 1500 },  // Tank 1
       'd88b4c010009063b': { heightCm: 32.63, capacityGal: 2500 }, // Tank 2
       'd88b4c01000bf5ee': { heightCm: 34.53, capacityGal: 2500 }  // Tank 3
     };
@@ -92,15 +93,6 @@ async function refreshData() {
 
     // Transform to dashboard format, merging MQTT readings where available
     output.tanks = [
-      {
-        id: 'tank1',
-        name: 'Tank 1 - Source/Chlorination',
-        status: 'no_sensor',
-        message: 'Sensor not yet installed',
-        level: null,
-        percentage: null,
-        capacity: 1500
-      },
       ...tanks.map(tank => {
         // Check if we have MQTT readings for this device
         const mqttData = mqttReadings[tank.id];
@@ -139,7 +131,7 @@ async function refreshData() {
           dataSource: mqttData ? 'mqtt' : 'rest'
         };
       })
-    ];
+    ].sort((a, b) => a.name.localeCompare(b.name));
 
     console.log(`✓ Found ${tanks.length} YoLink sensors (${tanks.filter(t => t.online).length} online)`);
   } catch (error) {
@@ -151,13 +143,13 @@ async function refreshData() {
       
       // Per-tank calibration (same as above)
       const TANK_CAL = {
+        'd88b4c0120002bad': { heightCm: 16.1, capacityGal: 1500 },  // Tank 1
         'd88b4c010009063b': { heightCm: 32.63, capacityGal: 2500 }, // Tank 2
         'd88b4c01000bf5ee': { heightCm: 34.53, capacityGal: 2500 }  // Tank 3
       };
       const DEFAULT_CAL = { heightCm: 39, capacityGal: 2500 };
 
       output.tanks = [
-        { id: 'tank1', name: 'Tank 1 - Source/Chlorination', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
         ...Object.values(mqttReadings).map(reading => {
           const cal = TANK_CAL[reading.deviceId] || DEFAULT_CAL;
           // Calculate percentage and gallons
@@ -185,11 +177,11 @@ async function refreshData() {
             dataSource: 'mqtt'
           };
         })
-      ];
+      ].sort((a, b) => a.name.localeCompare(b.name));
     } else {
       // No MQTT readings, use placeholder data
       output.tanks = [
-        { id: 'tank1', name: 'Tank 1 - Source/Chlorination', status: 'no_sensor', level: null, percentage: null, capacity: 1500 },
+        { id: 'tank1', name: 'Tank 1 - Source/Chlorination', status: 'offline', level: null, percentage: null, capacity: 1500 },
         { id: 'tank2', name: 'Tank 2 - Distribution', status: 'offline', level: null, percentage: null, capacity: 2500 },
         { id: 'tank3', name: 'Tank 3 - Distribution', status: 'offline', level: null, percentage: null, capacity: 2500 }
       ];

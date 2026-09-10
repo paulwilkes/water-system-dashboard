@@ -17,6 +17,7 @@ const DATA_DIR = path.join(__dirname, '..', '..', 'public', 'data');
 
 // Known tank sensors (mirrors yolink-mqtt.js)
 const TANK_DEVICES = {
+  'd88b4c0120002bad': { name: 'Tank 1 - Source/Chlorination', capacity: 1500 },
   'd88b4c010009063b': { name: 'Tank 2 - Distribution', capacity: 6000 },
   'd88b4c01000bf5ee': { name: 'Tank 3 - Distribution', capacity: 5000 }
 };
