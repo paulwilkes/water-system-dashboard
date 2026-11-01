@@ -187,7 +187,15 @@ app.use('/api/chlorine', chlorineRoutes);
 // Inbound SMS webhook (no auth — authenticates via Twilio request signature)
 app.use('/api/sms', smsRoutes);
 
-// ── Static files (CSS, JS, images, opt-in, privacy, terms, data) ──
+// Readings and tester notes are for the dashboard. The static server decodes and tidies a path,
+// so read it the same way (/%64ata/ and /./data/ are /data/).
+app.use((req, res, next) => {
+  let file;
+  try { file = path.posix.normalize(decodeURIComponent(req.path)); } catch { return res.status(400).end(); }
+  return /^\/data(\/|$)/i.test(file) ? requireAuth(req, res, next) : next();
+});
+
+// ── Static files (CSS, JS, images, opt-in, privacy, terms) ──
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Protected API routes ──
