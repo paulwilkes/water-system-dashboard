@@ -4,6 +4,14 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.5.4] — 2026-11-01 — Opt-in and Alerts Page Hardening
+
+### Changed
+- **Public opt-in is rationed** — US numbers only, names capped, 3 signups an hour per visitor and 30 an hour overall. Signed-in board members are unaffected. The optional consent box works as before.
+- **Subscriber names never go into an onclick** on the alerts page, and escaping now covers quotes.
+
+---
+
 ## [0.5.3] — 2026-03-14 — Twilio Compliance Fixes for Campaign Approval
 
 Addressed specific feedback from Twilio reviewer to unblock toll-free campaign approval.

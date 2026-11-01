@@ -38,6 +38,32 @@ router.use((req, res, next) => {
   return requireAuth(req, res, next);
 });
 
+// The public opt-in form texts a confirmation, so it's rationed: a number has to be a real US one, and
+// signups are capped per visitor and overall. A resident who hits a cap can still call or email the board.
+const US_PHONE = /^1?[2-9]\d{2}[2-9]\d{6}$/;
+const HOUR = 60 * 60 * 1000;
+const PER_VISITOR_PER_HOUR = 3;
+const ALL_VISITORS_PER_HOUR = 30;
+let signupWindowStart = 0;
+let signupsThisWindow = 0;
+const visitorSignups = new Map();
+
+function overSignupLimit(req) {
+  const now = Date.now();
+  if (now - signupWindowStart > HOUR) {
+    signupWindowStart = now;
+    signupsThisWindow = 0;
+    visitorSignups.clear();
+  }
+  // Fly sets this header itself, so a visitor can't choose their own
+  const visitor = req.get('fly-client-ip') || req.ip;
+  const mine = visitorSignups.get(visitor) || 0;
+  if (mine >= PER_VISITOR_PER_HOUR || signupsThisWindow >= ALL_VISITORS_PER_HOUR) return true;
+  visitorSignups.set(visitor, mine + 1);
+  signupsThisWindow++;
+  return false;
+}
+
 /**
  * GET /api/subscribers
  * List subscribers with optional filters: ?search=, ?zone=, ?status=
@@ -102,13 +128,29 @@ router.get('/:id', (req, res) => {
  */
 router.post('/', (req, res) => {
   try {
-    const { name, phone, zone, status } = req.body;
+    const { name, phone, zone, status } = req.body ?? {};
 
-    if (!name || !phone) {
+    if (typeof name !== 'string' || typeof phone !== 'string' || !name.trim() || !phone.trim()) {
       return res.status(400).json({ error: 'Name and phone are required' });
     }
 
-    const result = createSubscriber({ name, phone, zone, status });
+    // Board members signed in can add anyone; everyone else comes through the public form's rules
+    const fromBoard = req.isAuthenticated();
+    if (!fromBoard) {
+      if (name.length > 100 || /[\x00-\x1f<>]/.test(name)) {
+        return res.status(400).json({ error: 'Please enter just your name.' });
+      }
+      if (!US_PHONE.test(phone.replace(/\D/g, ''))) {
+        return res.status(400).json({ error: 'Please enter a valid 10-digit US phone number.' });
+      }
+      if (overSignupLimit(req)) {
+        return res.status(429).json({ error: 'Too many signups just now. Please try again in an hour, or contact the water board.' });
+      }
+    }
+
+    const result = createSubscriber(fromBoard
+      ? { name, phone, zone, status }
+      : { name: name.trim(), phone, status: status === 'active' ? 'active' : 'pending' });
 
     // Send opt-in confirmation SMS only if subscriber consented (non-blocking)
     const twilio = getTwilioService();

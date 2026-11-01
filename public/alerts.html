@@ -1233,6 +1233,11 @@
       return;
     }
 
+    // A name comes from the public form, so it never goes into an onclick: the button only carries data
+    tbody.onclick = (e) => {
+      const btn = e.target.closest('[data-remove-id]');
+      if (btn) deleteSubscriberConfirm(Number(btn.dataset.removeId), btn.dataset.removeName);
+    };
     tbody.innerHTML = subscribers.map(sub => {
       const statusClass = sub.status === 'active' ? 'badge-active' :
                           sub.status === 'pending' ? 'badge-pending' : 'badge-inactive';
@@ -1250,7 +1255,7 @@
         <td><span class="badge ${statusClass}">${statusLabel}</span></td>
         <td>${optedIn}</td>
         <td>
-          <button class="btn btn-secondary btn-sm" onclick="deleteSubscriberConfirm(${sub.id}, '${escapeHtml(sub.name)}')">Remove</button>
+          <button class="btn btn-secondary btn-sm" data-remove-id="${Number(sub.id)}" data-remove-name="${escapeHtml(sub.name)}">Remove</button>
         </td>
       </tr>`;
     }).join('');
@@ -1344,7 +1349,7 @@
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
-    return div.innerHTML;
+    return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   function formatPhoneDisplay(phone) {
