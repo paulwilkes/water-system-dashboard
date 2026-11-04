@@ -1,17 +1,42 @@
 /**
- * Chlorine form webhook
+ * Chlorine routes
  *
- * Receives POSTs from the Google Form Apps Script trigger on chlorine test
- * submissions and emails the board via Resend (branded, DKIM-signed).
+ * POST /submission: receives POSTs from the Google Form Apps Script trigger on
+ * chlorine test submissions and emails the board via Resend (branded,
+ * DKIM-signed). Authenticated with a shared secret header, no user session.
  *
- * Authenticated with a shared secret header — no user session.
+ * GET /latest: public. The newest reading for the iOS home-screen widget, which
+ * can't log in. Only ppm, status and timestamp: never the submitter, notes or
+ * tank readings that sit behind login in /data/current.json.
  */
 
 import { Router } from 'express';
 import crypto from 'crypto';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { sendSubmissionEmail } from '../../lib/chlorine-notifier.js';
 
 const router = Router();
+
+const CURRENT_DATA_FILE = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..', '..', 'public', 'data', 'current.json'
+);
+
+router.get('/latest', async (req, res) => {
+  let latest;
+  try {
+    const data = JSON.parse(await fs.readFile(CURRENT_DATA_FILE, 'utf8'));
+    latest = data?.chlorine?.latest;
+  } catch (err) {
+    console.error('[chlorine latest] could not read current data:', err.message);
+  }
+  if (!latest) {
+    return res.status(503).json({ error: 'No chlorine reading available' });
+  }
+  res.json({ ppm: latest.ppm, status: latest.status, timestamp: latest.timestamp });
+});
 
 function constantTimeEqual(a, b) {
   const ab = Buffer.from(a || '', 'utf8');

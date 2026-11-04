@@ -4,6 +4,13 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.5.5] — 2026-11-04 — Public Chlorine Reading for the Widget
+
+### Added
+- **`GET /api/chlorine/latest`** is public and returns only the newest ppm, status and timestamp. The Scriptable home-screen widget uses it, since `/data` went behind login. Tester names, notes and tank readings stay behind login.
+
+---
+
 ## [0.5.4] — 2026-11-01 — Opt-in and Alerts Page Hardening
 
 ### Changed
