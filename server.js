@@ -23,6 +23,7 @@ import smsRoutes from './api/routes/sms.js';
 import refreshData from './api/refresh-data.js';
 import { startMQTT } from './lib/yolink-mqtt.js';
 import { startStaleCheckScheduler } from './lib/chlorine-notifier.js';
+import { startDohReportScheduler } from './lib/doh-report.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -240,4 +241,7 @@ app.listen(PORT, '0.0.0.0', () => {
 
   // Hourly check for stale chlorine data → branded board alert via Resend
   startStaleCheckScheduler();
+
+  // Monthly DOH CT6 report: built on the 1st, emailed to Paul for review
+  startDohReportScheduler();
 });
