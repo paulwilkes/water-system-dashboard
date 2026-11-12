@@ -735,13 +735,23 @@
                 });
                 document.getElementById('last-update').textContent = `Last Updated: ${updateTime}`;
                 
-                // Render all sections
-                renderTanks(data.tanks);
-                renderChlorine(data.chlorine);
-                renderRecentMonths(data.production.recentMonths);
-                renderYearlyTrends(data.production.yearly);
-                renderDistributionLeak(data.distributionLeak);
-                
+                // Render all sections. Each one is isolated so a gap in one data
+                // source (say, an empty production sheet) can't blank the whole page.
+                const sections = [
+                    ['tanks', () => renderTanks(data.tanks || [])],
+                    ['chlorine', () => renderChlorine(data.chlorine || {})],
+                    ['recent production', () => renderRecentMonths(data.production?.recentMonths)],
+                    ['yearly trends', () => renderYearlyTrends(data.production?.yearly)],
+                    ['distribution leak', () => renderDistributionLeak(data.distributionLeak)]
+                ];
+                for (const [name, render] of sections) {
+                    try {
+                        render();
+                    } catch (err) {
+                        console.error(`Failed to render ${name}:`, err);
+                    }
+                }
+
             } catch (error) {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
@@ -895,7 +905,7 @@
 
         // Render chlorine data
         function renderChlorine(chlorine) {
-            if (chlorine.latest) {
+            if (chlorine.latest && typeof chlorine.latest.ppm === 'number') {
                 const latest = chlorine.latest;
                 document.getElementById('chlorine-value').textContent = latest.ppm.toFixed(2);
                 
@@ -1162,8 +1172,9 @@
                             displayColors: true,
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + 
-                                           context.parsed.y.toFixed(0).toLocaleString() + ' gal/day';
+                                    const v = context.parsed.y;
+                                    return context.dataset.label + ': ' +
+                                           (v === null ? 'N/A' : Math.round(v).toLocaleString() + ' gal/day');
                                 }
                             }
                         }
@@ -1200,27 +1211,36 @@
             
             // Render stats
             if (yearly.length > 0) {
+                // Historical years carry usage only (production is null), so any of
+                // these numbers can be missing. Show "--" rather than crash.
+                const isNum = v => typeof v === 'number' && isFinite(v);
+                const fmt = v => isNum(v) ? Math.round(v).toLocaleString() : '--';
                 const currentYear = yearly[yearly.length - 1];
                 const firstYear = yearly[0];
-                const buffer = ((currentYear.production - currentYear.usage) / currentYear.production * 100).toFixed(0);
-                const growth = ((currentYear.usage - firstYear.usage) / firstYear.usage * 100).toFixed(0);
-                
+                const buffer = isNum(currentYear.production) && currentYear.production > 0 && isNum(currentYear.usage)
+                    ? (currentYear.production - currentYear.usage) / currentYear.production * 100
+                    : null;
+                const growth = isNum(firstYear.usage) && firstYear.usage > 0 && isNum(currentYear.usage)
+                    ? (currentYear.usage - firstYear.usage) / firstYear.usage * 100
+                    : null;
+                const sign = isNum(growth) && growth >= 0 ? '+' : '';
+
                 document.getElementById('stats-grid').innerHTML = `
                     <div class="stat-card">
                         <div class="stat-label">${currentYear.year} Avg Production</div>
-                        <div class="stat-value">${currentYear.production.toFixed(0).toLocaleString()}<span class="stat-unit">gal/day</span></div>
+                        <div class="stat-value">${fmt(currentYear.production)}<span class="stat-unit">gal/day</span></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">${currentYear.year} Avg Usage</div>
-                        <div class="stat-value">${currentYear.usage.toFixed(0).toLocaleString()}<span class="stat-unit">gal/day</span></div>
+                        <div class="stat-value">${fmt(currentYear.usage)}<span class="stat-unit">gal/day</span></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Safety Buffer</div>
-                        <div class="stat-value">${buffer}<span class="stat-unit">% surplus</span></div>
+                        <div class="stat-value">${fmt(buffer)}<span class="stat-unit">% surplus</span></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">${yearly.length}-Year Growth</div>
-                        <div class="stat-value">+${growth}<span class="stat-unit">% usage</span></div>
+                        <div class="stat-value">${isNum(growth) ? sign + fmt(growth) : '--'}<span class="stat-unit">% usage</span></div>
                     </div>
                 `;
             }
@@ -1425,7 +1445,8 @@
                             displayColors: false,
                             callbacks: {
                                 label: function(context) {
-                                    return 'Water Loss: ' + context.parsed.y.toFixed(1) + '%';
+                                    const v = context.parsed.y;
+                                    return 'Water Loss: ' + (v === null ? 'N/A' : v.toFixed(1) + '%');
                                 }
                             }
                         }
