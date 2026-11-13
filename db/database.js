@@ -153,7 +153,73 @@ export function initDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_inbound_messages_from ON inbound_messages(from_number);
     CREATE INDEX IF NOT EXISTS idx_inbound_messages_created ON inbound_messages(created_at);
+
+    -- ── Project expenses (receipts for review and reimbursement) ──
+    -- Money is stored as integer cents everywhere.
+    CREATE TABLE IF NOT EXISTS expense_projects (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      name          TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      description   TEXT,
+      budget_cents  INTEGER,
+      status        TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','closed')),
+      created_by    TEXT,
+      created_at    TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS expense_categories (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      sort_order  INTEGER NOT NULL DEFAULT 100
+    );
+
+    CREATE TABLE IF NOT EXISTS expense_receipts (
+      id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id         INTEGER NOT NULL REFERENCES expense_projects(id),
+      vendor             TEXT,
+      purchase_date      TEXT,
+      subtotal_cents     INTEGER,
+      tax_cents          INTEGER,
+      total_cents        INTEGER,
+      paid_by            TEXT,
+      payment_method     TEXT,
+      status             TEXT NOT NULL DEFAULT 'draft'
+                           CHECK(status IN ('draft','submitted','approved','reimbursed')),
+      approved_by        TEXT,
+      approved_at        TEXT,
+      reimbursed_on      TEXT,
+      reimbursement_ref  TEXT,
+      notes              TEXT,
+      file_name          TEXT,
+      original_name      TEXT,
+      mime_type          TEXT,
+      file_size          INTEGER,
+      extraction_status  TEXT NOT NULL DEFAULT 'pending'
+                           CHECK(extraction_status IN ('pending','done','failed','skipped')),
+      extraction_error   TEXT,
+      extracted_json     TEXT,
+      created_by         TEXT,
+      created_at         TEXT DEFAULT (datetime('now')),
+      updated_at         TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_expense_receipts_project ON expense_receipts(project_id);
+    CREATE INDEX IF NOT EXISTS idx_expense_receipts_status ON expense_receipts(status);
+
+    CREATE TABLE IF NOT EXISTS expense_items (
+      id                INTEGER PRIMARY KEY AUTOINCREMENT,
+      receipt_id        INTEGER NOT NULL REFERENCES expense_receipts(id) ON DELETE CASCADE,
+      line_no           INTEGER NOT NULL DEFAULT 0,
+      description       TEXT NOT NULL DEFAULT '',
+      quantity          REAL,
+      unit_price_cents  INTEGER,
+      amount_cents      INTEGER NOT NULL DEFAULT 0,
+      category          TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_expense_items_receipt ON expense_items(receipt_id);
   `);
+
+  seedExpenseDefaults();
 
   runMigrations();
 
@@ -227,6 +293,42 @@ function migrateTableIfMissing({ table, requiredToken, rebuild }) {
   } finally {
     db.pragma('foreign_keys = ON');
   }
+}
+
+/**
+ * Starter categories and the first project. INSERT OR IGNORE, so anything the
+ * board adds later is left alone. A starter category deleted by hand comes
+ * back on the next restart.
+ */
+function seedExpenseDefaults() {
+  const categories = [
+    'Plumbing & fittings',
+    'Electrical',
+    'Chemicals',
+    'Pumps & equipment',
+    'Tools',
+    'Hardware & fasteners',
+    'Testing supplies',
+    'Safety gear',
+    'Other'
+  ];
+  const addCategory = db.prepare(
+    'INSERT OR IGNORE INTO expense_categories (name, sort_order) VALUES (?, ?)'
+  );
+  categories.forEach((name, i) => addCategory.run(name, (i + 1) * 10));
+
+  db.prepare(`
+    INSERT OR IGNORE INTO expense_projects (name, description, created_by)
+    VALUES ('Chlorine upgrade', 'Chlorination system upgrade', 'system')
+  `).run();
+}
+
+/**
+ * Directory that holds the database file. Uploaded receipts live beside it
+ * (on Fly that's the persistent /data volume).
+ */
+export function getDataDir() {
+  return path.dirname(DB_PATH);
 }
 
 /**

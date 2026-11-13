@@ -20,6 +20,7 @@ import sensorRoutes from './api/routes/sensors.js';
 import emailRoutes, { handleUnsubscribe } from './api/routes/emails.js';
 import chlorineRoutes from './api/routes/chlorine.js';
 import smsRoutes from './api/routes/sms.js';
+import expenseRoutes from './api/routes/expenses.js';
 import refreshData from './api/refresh-data.js';
 import { startMQTT } from './lib/yolink-mqtt.js';
 import { startStaleCheckScheduler } from './lib/chlorine-notifier.js';
@@ -174,6 +175,14 @@ app.get('/emails.html', requireAuth, (req, res) => {
   res.redirect('/emails');
 });
 
+app.get('/expenses', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'expenses.html'));
+});
+
+app.get('/expenses.html', requireAuth, (req, res) => {
+  res.redirect('/expenses');
+});
+
 // Public unsubscribe page (no auth) — must be before static so our handler runs
 app.get('/unsubscribe', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'unsubscribe.html'));
@@ -204,6 +213,7 @@ app.use('/api/alerts', requireAuth, alertRoutes);
 app.use('/api/subscribers', subscriberRoutes);  // mixed auth handled inside router
 app.use('/api/sensors', requireAuth, sensorRoutes);
 app.use('/api/emails', requireAuth, emailRoutes);
+app.use('/api/expenses', requireAuth, expenseRoutes);
 
 app.get('/api/refresh', requireAuth, async (req, res) => {
   try {

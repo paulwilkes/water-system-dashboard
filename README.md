@@ -45,6 +45,12 @@ A real-time monitoring dashboard and SMS alert system for the Beulah Park Water 
 - Authenticated by validating the **Twilio request signature** (no shared secret needed)
 - Inbound messages are logged to the `inbound_messages` table
 
+### Project Expenses (`/expenses`, Google OAuth protected)
+- **Receipt upload** from a phone camera or a PDF; Claude reads the vendor, date, tax, total and line items into a draft
+- **Review against the photo**, then Submit → Approve → Mark reimbursed (date + check number)
+- **Who's owed, spending by category, budget left** per project; CSV export and a printable report for the treasurer
+- Files stored in `<DB dir>/receipts` (the Fly `/data` volume); set `ANTHROPIC_API_KEY` for automatic reading
+
 ### Security & Authentication
 - **Google OAuth 2.0** — Email-based allowlist stored in SQLite
 - **Protected routes** — Dashboard and alerts require authentication

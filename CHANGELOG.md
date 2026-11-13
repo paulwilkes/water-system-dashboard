@@ -4,6 +4,20 @@ All notable changes to the Beulah Park Water System Dashboard.
 
 ---
 
+## [0.6.0] - 2026-11-13 - Project Expenses and Receipts
+
+### Added
+- **Expenses page** (`/expenses`, behind login) for tracking what's spent on a project, starting with the chlorine upgrade. Upload a receipt photo or PDF and it's read automatically (vendor, date, tax, total and each line item with a category), then a board member checks it against the photo and submits it.
+- **Reimbursement tracking**: each receipt records who paid and moves Draft → Submitted → Approved → Reimbursed (with date and check number). The page shows what's owed to each person, spending by category, and budget left.
+- **Treasurer report**: a CSV export (every line item plus a sales tax line per receipt) and a print layout.
+- Projects are reusable: add a new one for the next job, close it when it's done.
+
+### Notes
+- Receipt files are kept beside the database (`/data/receipts` on the Fly volume).
+- Automatic reading needs `ANTHROPIC_API_KEY`. Without it, uploads still work and receipts are typed in by hand.
+
+---
+
 ## [0.5.5] — 2026-11-04 — Public Chlorine Reading for the Widget
 
 ### Added
